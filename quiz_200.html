@@ -1,0 +1,2459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>唯能润滑脂知识刷题系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+.header h1 { font-size: 24px; font-weight: 600; }
+.header p { font-size: 14px; opacity: 0.85; margin-top: 5px; }
+.container { max-width: 800px; margin: 0 auto; padding: 20px; }
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500; transition: all 0.3s; background: white; color: #666; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.tab:hover { background: #e8f4fd; color: #2980b9; }
+.tab.active { background: #2980b9; color: white; box-shadow: 0 2px 8px rgba(41,128,185,0.4); }
+.card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+.progress-bar { width: 100%; height: 8px; background: #e8e8e8; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71); border-radius: 4px; transition: width 0.5s ease; }
+.question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 14px; color: #888; flex-wrap: wrap; gap: 8px; }
+.question-number { font-weight: 600; color: #2980b9; font-size: 16px; }
+.category-tag { background: #eaf2f8; color: #2980b9; padding: 3px 10px; border-radius: 12px; font-size: 12px; }
+.question-text { font-size: 17px; line-height: 1.7; margin-bottom: 20px; color: #222; font-weight: 500; }
+.options { display: flex; flex-direction: column; gap: 12px; }
+.option { padding: 14px 18px; border: 2px solid #e8e8e8; border-radius: 10px; cursor: pointer; transition: all 0.25s; font-size: 15px; line-height: 1.5; display: flex; align-items: flex-start; gap: 12px; }
+.option:hover { border-color: #2980b9; background: #f0f7fc; transform: translateX(4px); }
+.option.selected { border-color: #3498db; background: #eaf2f8; }
+.option.correct { border-color: #27ae60; background: #eafaf1; color: #1a7a3e; }
+.option.wrong { border-color: #e74c3c; background: #fdf2f2; color: #c0392b; }
+.option.disabled { pointer-events: none; opacity: 0.7; }
+.option.disabled.correct, .option.disabled.wrong { opacity: 1; }
+.option-label { min-width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #666; flex-shrink: 0; transition: all 0.25s; }
+.option.selected .option-label { background: #3498db; color: white; }
+.option.correct .option-label { background: #27ae60; color: white; }
+.option.wrong .option-label { background: #e74c3c; color: white; }
+.explanation { margin-top: 15px; padding: 15px; background: #fef9e7; border-left: 4px solid #f39c12; border-radius: 4px; font-size: 14px; line-height: 1.6; color: #7d6608; display: none; }
+.explanation.show { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.btn { padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500; transition: all 0.3s; }
+.btn-primary { background: #2980b9; color: white; }
+.btn-primary:hover { background: #1a5276; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(41,128,185,0.3); }
+.btn-success { background: #27ae60; color: white; }
+.btn-success:hover { background: #1a7a3e; }
+.btn-outline { background: transparent; color: #2980b9; border: 2px solid #2980b9; }
+.btn-outline:hover { background: #eaf2f8; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 10px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.stat-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-value { font-size: 32px; font-weight: 700; margin-bottom: 5px; }
+.stat-label { font-size: 13px; color: #888; }
+.stat-value.green { color: #27ae60; }
+.stat-value.blue { color: #2980b9; }
+.stat-value.orange { color: #e67e22; }
+.stat-value.red { color: #e74c3c; }
+.chart-container { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+.chart-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
+.chart-bar { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
+.chart-label { min-width: 120px; font-size: 13px; color: #666; text-align: right; }
+.chart-track { flex: 1; height: 24px; background: #f0f0f0; border-radius: 12px; overflow: hidden; }
+.chart-fill { height: 100%; border-radius: 12px; transition: width 0.8s ease; display: flex; align-items: center; padding-left: 10px; font-size: 12px; color: white; font-weight: 600; }
+.wrong-item { padding: 12px 15px; background: #fdf8f8; border-left: 3px solid #e74c3c; margin-bottom: 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+.wrong-item:hover { background: #fde8e8; transform: translateX(3px); }
+.wrong-item .wrong-q { font-size: 14px; color: #333; margin-bottom: 4px; }
+.wrong-item .wrong-a { font-size: 12px; color: #e74c3c; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s; }
+.result-header { text-align: center; padding: 30px 0; }
+.result-score { font-size: 64px; font-weight: 700; color: #2980b9; }
+.result-label { font-size: 16px; color: #888; margin-top: 5px; }
+.mode-select { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+.mode-card { flex: 1; min-width: 200px; padding: 25px; border: 2px solid #e8e8e8; border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; }
+.mode-card:hover { border-color: #2980b9; transform: translateY(-3px); box-shadow: 0 4px 15px rgba(41,128,185,0.15); }
+.mode-card h3 { font-size: 18px; color: #333; margin-bottom: 8px; }
+.mode-card p { font-size: 13px; color: #888; }
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+.filter-btn { padding: 6px 14px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.filter-btn:hover, .filter-btn.active { background: #2980b9; color: white; border-color: #2980b9; }
+.empty-state { text-align: center; padding: 60px 20px; color: #aaa; }
+.empty-state .icon { font-size: 48px; margin-bottom: 15px; }
+.empty-state p { font-size: 15px; }
+.hidden { display: none !important; }
+
+/* Toast notification */
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .container { padding: 15px; }
+  .card { padding: 20px; }
+  .header h1 { font-size: 20px; }
+  .tabs { gap: 6px; }
+  .tab { padding: 8px 14px; font-size: 13px; }
+  .question-text { font-size: 15px; }
+  .option { padding: 12px 14px; font-size: 14px; }
+  .chart-label { min-width: 80px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="header">
+  <h1>🧪 唯能润滑脂知识刷题系统</h1>
+  <p>东莞市唯能新材料科技有限公司 · 内部培训</p>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" data-page="home">🏠 首页</button>
+    <button class="tab" data-page="practice">📝 顺序刷题</button>
+    <button class="tab" data-page="random">🎲 随机刷题</button>
+    <button class="tab" data-page="exam">📋 模拟考试</button>
+    <button class="tab" data-page="wrong">❌ 错题本</button>
+    <button class="tab" data-page="stats">📊 学习统计</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="page-home" class="page active">
+    <div class="card">
+      <div class="mode-select">
+        <div class="mode-card" onclick="switchPage('practice')">
+          <h3>📝 顺序刷题</h3>
+          <p>从第1题开始，逐题练习</p>
+          <p style="margin-top:8px;color:#2980b9;font-weight:600">共200题</p>
+        </div>
+        <div class="mode-card" onclick="switchPage('random')">
+          <h3>🎲 随机刷题</h3>
+          <p>随机抽取题目，每次不同</p>
+          <p style="margin-top:8px;color:#e67e22;font-weight:600">可选题数</p>
+        </div>
+        <div class="mode-card" onclick="switchPage('exam')">
+          <h3>📋 模拟考试</h3>
+          <p>限时测试，检验学习成果</p>
+          <p style="margin-top:8px;color:#27ae60;font-weight:600">可设题数</p>
+        </div>
+      </div>
+    </div>
+    <div class="stats-grid" id="home-stats"></div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div id="page-practice" class="page">
+    <div class="filter-bar" id="practice-filter"></div>
+    <div id="practice-area"></div>
+  </div>
+
+  <!-- RANDOM -->
+  <div id="page-random" class="page">
+    <div class="card" id="random-setup">
+      <h3 style="margin-bottom:15px">🎲 随机刷题设置</h3>
+      <p style="margin-bottom:15px;color:#666">选择每次随机抽取的题目数量：</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="btn btn-outline" onclick="startRandom(10)">10题</button>
+        <button class="btn btn-outline" onclick="startRandom(20)">20题</button>
+        <button class="btn btn-outline" onclick="startRandom(30)">30题</button>
+        <button class="btn btn-outline" onclick="startRandom(50)">50题</button>
+        <button class="btn btn-primary" onclick="startRandom(100)">100题</button>
+      </div>
+    </div>
+    <div id="random-area"></div>
+  </div>
+
+  <!-- EXAM -->
+  <div id="page-exam" class="page">
+    <div class="card" id="exam-setup">
+      <h3 style="margin-bottom:15px">📋 模拟考试设置</h3>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+        <label style="font-size:14px">题目数量：</label>
+        <select id="exam-count" style="padding:8px 15px;border:2px solid #ddd;border-radius:8px;font-size:14px">
+          <option value="20">20题</option>
+          <option value="30">30题</option>
+          <option value="50" selected>50题</option>
+          <option value="100">100题</option>
+          <option value="200">全部200题</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+        <label style="font-size:14px">每题时间：</label>
+        <select id="exam-time" style="padding:8px 15px;border:2px solid #ddd;border-radius:8px;font-size:14px">
+          <option value="30">30秒</option>
+          <option value="60" selected>60秒</option>
+          <option value="90">90秒</option>
+          <option value="120">120秒</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="startExam()" style="width:100%">开始考试</button>
+    </div>
+    <div id="exam-area"></div>
+  </div>
+
+  <!-- WRONG -->
+  <div id="page-wrong" class="page">
+    <div id="wrong-area"></div>
+  </div>
+
+  <!-- STATS -->
+  <div id="page-stats" class="page">
+    <div id="stats-area"></div>
+  </div>
+</div>
+
+<script>
+// ======== DATA ========
+const ALL_QUESTIONS = [
+  {
+    "id": "1001",
+    "question": "锥入度测试中，锥体刺入试料的时间规定为多少秒？",
+    "optionA": "3S",
+    "optionB": "5S",
+    "optionC": "10S",
+    "optionD": "15S",
+    "answer": "B"
+  },
+  {
+    "id": "1002",
+    "question": "锥入度测试中，锥入度的单位是以多少毫米表示？",
+    "optionA": "0.01mm",
+    "optionB": "0.1mm",
+    "optionC": "1mm",
+    "optionD": "10mm",
+    "answer": "B"
+  },
+  {
+    "id": "1003",
+    "question": "锥入度测试的标准温度是多少？",
+    "optionA": "20℃",
+    "optionB": "25℃",
+    "optionC": "30℃",
+    "optionD": "35℃",
+    "answer": "B"
+  },
+  {
+    "id": "1004",
+    "question": "锥入度测试中施加的负荷是什么？",
+    "optionA": "标准锥自身重力",
+    "optionB": "额外加重力",
+    "optionC": "弹簧力",
+    "optionD": "气压",
+    "answer": "A"
+  },
+  {
+    "id": "1005",
+    "question": "工作锥入度测定前，润滑脂需在润滑脂剪切工作器中经多少次往复工作？",
+    "optionA": "30次",
+    "optionB": "60次",
+    "optionC": "120次",
+    "optionD": "240次",
+    "answer": "B"
+  },
+  {
+    "id": "1006",
+    "question": "延长工作锥入度是在多于多少次往复工作后测定的？",
+    "optionA": "30次",
+    "optionB": "60次",
+    "optionC": "120次",
+    "optionD": "10000次",
+    "answer": "B"
+  },
+  {
+    "id": "1007",
+    "question": "NLGI等级中，000级润滑脂的锥入度范围是多少？",
+    "optionA": "445-475",
+    "optionB": "340-380",
+    "optionC": "265-295",
+    "optionD": "175-205",
+    "answer": "A"
+  },
+  {
+    "id": "1008",
+    "question": "NLGI等级共分为多少个等级？",
+    "optionA": "7个",
+    "optionB": "8个",
+    "optionC": "9个",
+    "optionD": "10个",
+    "answer": "C"
+  },
+  {
+    "id": "1009",
+    "question": "NLGI 6级润滑脂的状态类似什么？",
+    "optionA": "黄油",
+    "optionB": "半流体",
+    "optionC": "类似肥皂",
+    "optionD": "液体",
+    "answer": "C"
+  },
+  {
+    "id": "1010",
+    "question": "NLGI 000级润滑脂的状态属于什么类型？",
+    "optionA": "固体",
+    "optionB": "半流体",
+    "optionC": "软膏",
+    "optionD": "液体",
+    "answer": "B"
+  },
+  {
+    "id": "1011",
+    "question": "滴点的定义是什么？",
+    "optionA": "润滑脂完全熔化的温度",
+    "optionB": "润滑脂从脂杯中滴出第一滴液体时的温度",
+    "optionC": "润滑脂开始分解的温度",
+    "optionD": "润滑脂开始变软的温度",
+    "answer": "B"
+  },
+  {
+    "id": "1012",
+    "question": "滴点越高，说明润滑脂的什么性能越好？",
+    "optionA": "低温性能",
+    "optionB": "最高使用温度",
+    "optionC": "抗氧化性能",
+    "optionD": "抗水性",
+    "answer": "B"
+  },
+  {
+    "id": "1013",
+    "question": "润滑脂的建议使用温度应低于滴点多少？",
+    "optionA": "5-10℃",
+    "optionB": "10-20℃",
+    "optionC": "20-30℃",
+    "optionD": "30-40℃",
+    "answer": "C"
+  },
+  {
+    "id": "1014",
+    "question": "蒸发损失测试的条件是99°C加热多少小时？",
+    "optionA": "12h",
+    "optionB": "24h",
+    "optionC": "48h",
+    "optionD": "72h",
+    "answer": "B"
+  },
+  {
+    "id": "1015",
+    "question": "蒸发损失测试中，空气如何作用于试样？",
+    "optionA": "空气封闭在容器内",
+    "optionB": "空气通过试样表面",
+    "optionC": "空气注入试样内部",
+    "optionD": "无需空气",
+    "answer": "B"
+  },
+  {
+    "id": "1016",
+    "question": "润滑脂蒸发量大会导致什么后果？",
+    "optionA": "流动性增强",
+    "optionB": "干枯，寿命降低",
+    "optionC": "颜色变深",
+    "optionD": "粘度增大",
+    "answer": "B"
+  },
+  {
+    "id": "1017",
+    "question": "钢网分油测试的试样量为多少克？",
+    "optionA": "5g",
+    "optionB": "10g",
+    "optionC": "15g",
+    "optionD": "20g",
+    "answer": "B"
+  },
+  {
+    "id": "1018",
+    "question": "钢网分油测试使用的温度和时间条件是什么？",
+    "optionA": "80℃×12h",
+    "optionB": "100℃×24h",
+    "optionC": "120℃×24h",
+    "optionD": "100℃×12h",
+    "answer": "B"
+  },
+  {
+    "id": "1019",
+    "question": "钢网分油测试使用多少目的镍/不锈钢网？",
+    "optionA": "40目",
+    "optionB": "60目",
+    "optionC": "80目",
+    "optionD": "100目",
+    "answer": "B"
+  },
+  {
+    "id": "1020",
+    "question": "钢网分油测试主要反映润滑脂的什么性能？",
+    "optionA": "抗氧化安定性",
+    "optionB": "胶体安定性",
+    "optionC": "机械安定性",
+    "optionD": "热安定性",
+    "answer": "B"
+  },
+  {
+    "id": "1021",
+    "question": "钢网分油测试中网的锥角为多少度？",
+    "optionA": "30度",
+    "optionB": "45度",
+    "optionC": "60度",
+    "optionD": "90度",
+    "answer": "C"
+  },
+  {
+    "id": "1022",
+    "question": "扩散性测试中，毛玻璃片上涂润滑脂的厚度为多少毫米？",
+    "optionA": "0.1mm",
+    "optionB": "0.3mm",
+    "optionC": "0.5mm",
+    "optionD": "1.0mm",
+    "answer": "C"
+  },
+  {
+    "id": "1023",
+    "question": "扩散性测试的标准编号是什么？",
+    "optionA": "VN/T 017",
+    "optionB": "VN/T 044-2020",
+    "optionC": "VN/T 0324",
+    "optionD": "VN/T 0338",
+    "answer": "B"
+  },
+  {
+    "id": "1024",
+    "question": "铜片腐蚀测试中，铜片在润滑脂中的放置条件是什么？",
+    "optionA": "常温/48h",
+    "optionB": "80℃/12h",
+    "optionC": "100℃/24h",
+    "optionD": "120℃/24h",
+    "answer": "C"
+  },
+  {
+    "id": "1025",
+    "question": "铜片腐蚀测试的甲法采用什么方式评定？",
+    "optionA": "看有无绿色或黑色变化",
+    "optionB": "对比标准板",
+    "optionC": "测量重量变化",
+    "optionD": "测量厚度变化",
+    "answer": "B"
+  },
+  {
+    "id": "1026",
+    "question": "铜片腐蚀测试中，乙法主要观察铜片有无什么颜色的变化？",
+    "optionA": "红色或棕色",
+    "optionB": "绿色或黑色",
+    "optionC": "黄色或白色",
+    "optionD": "紫色或蓝色",
+    "answer": "B"
+  },
+  {
+    "id": "1027",
+    "question": "四球测试中，PB代表什么？",
+    "optionA": "最大无卡咬负荷",
+    "optionB": "烧结负荷",
+    "optionC": "磨斑负荷",
+    "optionD": "磨损负荷",
+    "answer": "A"
+  },
+  {
+    "id": "1028",
+    "question": "四球测试中，PD代表什么？",
+    "optionA": "最大无卡咬负荷",
+    "optionB": "烧结负荷",
+    "optionC": "磨斑负荷",
+    "optionD": "磨损负荷",
+    "answer": "B"
+  },
+  {
+    "id": "1029",
+    "question": "四球磨斑直径测试的负荷为多少？",
+    "optionA": "196N",
+    "optionB": "294N",
+    "optionC": "392N",
+    "optionD": "490N",
+    "answer": "C"
+  },
+  {
+    "id": "1030",
+    "question": "四球磨斑直径测试的转速条件是多少？",
+    "optionA": "600r/min",
+    "optionB": "800r/min",
+    "optionC": "1000r/min",
+    "optionD": "1200r/min",
+    "answer": "D"
+  },
+  {
+    "id": "1031",
+    "question": "四球磨斑直径测试中，测量的是下几个球的磨痕平均直径？",
+    "optionA": "1个",
+    "optionB": "2个",
+    "optionC": "3个",
+    "optionD": "4个",
+    "answer": "C"
+  },
+  {
+    "id": "1032",
+    "question": "四球测试中有几个球固定承重？",
+    "optionA": "1个",
+    "optionB": "2个",
+    "optionC": "3个",
+    "optionD": "4个",
+    "answer": "C"
+  },
+  {
+    "id": "1033",
+    "question": "润滑脂属于什么类型的流体？",
+    "optionA": "牛顿流体",
+    "optionB": "非牛顿流体",
+    "optionC": "理想流体",
+    "optionD": "塑性流体",
+    "answer": "B"
+  },
+  {
+    "id": "1034",
+    "question": "流变测试中，表征动态粘度使用的剪切率是多少？",
+    "optionA": "100s⁻¹",
+    "optionB": "300s⁻¹",
+    "optionC": "500s⁻¹",
+    "optionD": "1000s⁻¹",
+    "answer": "C"
+  },
+  {
+    "id": "1035",
+    "question": "粘度等级M的粘度范围是多少mPa·s？",
+    "optionA": "2000-4000",
+    "optionB": "4000-8000",
+    "optionC": "8000-20000",
+    "optionD": "≥20000",
+    "answer": "B"
+  },
+  {
+    "id": "1036",
+    "question": "润滑脂的触变性是指什么现象？",
+    "optionA": "剪切时稠度下降，停止后上升",
+    "optionB": "剪切时稠度上升，停止后下降",
+    "optionC": "温度升高粘度降低",
+    "optionD": "温度降低粘度升高",
+    "answer": "A"
+  },
+  {
+    "id": "1037",
+    "question": "流变测试使用的仪器是什么？",
+    "optionA": "旋转粘度计",
+    "optionB": "Haake流变仪",
+    "optionC": "布氏粘度计",
+    "optionD": "毛细管粘度计",
+    "answer": "B"
+  },
+  {
+    "id": "1038",
+    "question": "基础油运动粘度的单位是什么？",
+    "optionA": "cSt(mm²/s)",
+    "optionB": "cP",
+    "optionC": "Pa·s",
+    "optionD": "mPa·s",
+    "answer": "A"
+  },
+  {
+    "id": "1039",
+    "question": "动力粘度的单位Pa·s等于多少cP？",
+    "optionA": "100cP",
+    "optionB": "500cP",
+    "optionC": "1000cP",
+    "optionD": "10000cP",
+    "answer": "C"
+  },
+  {
+    "id": "1040",
+    "question": "转速较高的工况应选择什么粘度的润滑脂？",
+    "optionA": "高粘度",
+    "optionB": "低粘度",
+    "optionC": "中等粘度",
+    "optionD": "无所谓",
+    "answer": "B"
+  },
+  {
+    "id": "1041",
+    "question": "载荷较大的工况应选择什么粘度的润滑脂？",
+    "optionA": "高粘度",
+    "optionB": "低粘度",
+    "optionC": "中等粘度",
+    "optionD": "无所谓",
+    "answer": "A"
+  },
+  {
+    "id": "1042",
+    "question": "往复摩擦测试中，静摩擦测试使用的材料对是什么？",
+    "optionA": "Φ10mm POM/钢球",
+    "optionB": "304钢/ABS板",
+    "optionC": "304钢/POM板",
+    "optionD": "304钢/PA板",
+    "answer": "A"
+  },
+  {
+    "id": "1043",
+    "question": "往复摩擦测试的测试温度是多少？",
+    "optionA": "0℃",
+    "optionB": "10℃",
+    "optionC": "25℃",
+    "optionD": "40℃",
+    "answer": "C"
+  },
+  {
+    "id": "1044",
+    "question": "橡胶材料相容性测试的温度和时间条件是什么？",
+    "optionA": "70℃/72h",
+    "optionB": "70℃/168h",
+    "optionC": "100℃/24h",
+    "optionD": "100℃/168h",
+    "answer": "B"
+  },
+  {
+    "id": "1045",
+    "question": "橡胶材料相容性测试检测的项目不包括以下哪项？",
+    "optionA": "硬度变化率",
+    "optionB": "重量变化率",
+    "optionC": "尺寸变化率",
+    "optionD": "颜色变化率",
+    "answer": "D"
+  },
+  {
+    "id": "1046",
+    "question": "润滑脂对橡胶的化学作用是指什么？",
+    "optionA": "吸收润滑介质",
+    "optionB": "提取增塑剂",
+    "optionC": "改变橡胶结构",
+    "optionD": "软化橡胶",
+    "answer": "C"
+  },
+  {
+    "id": "1047",
+    "question": "氧化安定性测试中使用的氧气压力是多少？",
+    "optionA": "0.5MPa",
+    "optionB": "0.8MPa",
+    "optionC": "1.0MPa",
+    "optionD": "1.5MPa",
+    "answer": "B"
+  },
+  {
+    "id": "1048",
+    "question": "氧化安定性测试中，试样在100℃条件下加热多长时间？",
+    "optionA": "24h",
+    "optionB": "48h",
+    "optionC": "100h",
+    "optionD": "168h",
+    "answer": "C"
+  },
+  {
+    "id": "1049",
+    "question": "低温扭矩测试使用的轴承型号是什么？",
+    "optionA": "D202型",
+    "optionB": "D204型",
+    "optionC": "D206型",
+    "optionD": "D208型",
+    "answer": "B"
+  },
+  {
+    "id": "1050",
+    "question": "低温扭矩测试中，运转转矩是指什么？",
+    "optionA": "开始转动时的最大转矩",
+    "optionB": "10min后的转矩",
+    "optionC": "30min后的转矩",
+    "optionD": "60min后的转矩平均值",
+    "answer": "D"
+  },
+  {
+    "id": "1051",
+    "question": "与润滑油相比，润滑脂的保持性如何？",
+    "optionA": "差",
+    "optionB": "一般",
+    "optionC": "好",
+    "optionD": "极好",
+    "answer": "C"
+  },
+  {
+    "id": "1052",
+    "question": "以下哪项是润滑脂的缺点？",
+    "optionA": "泄漏小",
+    "optionB": "旋转速度极限",
+    "optionC": "密封容易",
+    "optionD": "补充间隔长",
+    "answer": "B"
+  },
+  {
+    "id": "1053",
+    "question": "润滑脂不具备以下哪种功能？",
+    "optionA": "密封",
+    "optionB": "冷却",
+    "optionC": "润滑",
+    "optionD": "减振",
+    "answer": "B"
+  },
+  {
+    "id": "1054",
+    "question": "润滑脂中增稠剂的含量占比范围是？",
+    "optionA": "0-10%",
+    "optionB": "5-30%",
+    "optionC": "70-90%",
+    "optionD": "30-50%",
+    "answer": "B"
+  },
+  {
+    "id": "1055",
+    "question": "润滑脂中基础油的含量占比范围是？",
+    "optionA": "5-30%",
+    "optionB": "30-50%",
+    "optionC": "70-90%",
+    "optionD": "90-100%",
+    "answer": "C"
+  },
+  {
+    "id": "1056",
+    "question": "润滑脂中稠化剂的作用是？",
+    "optionA": "提供润滑性",
+    "optionB": "形成海绵/蜂窝骨架充满基础油",
+    "optionC": "提高耐热性",
+    "optionD": "降低凝固点",
+    "answer": "B"
+  },
+  {
+    "id": "1057",
+    "question": "润滑脂中添加剂的含量占比范围是？",
+    "optionA": "0-10%",
+    "optionB": "5-30%",
+    "optionC": "10-20%",
+    "optionD": "30-50%",
+    "answer": "A"
+  },
+  {
+    "id": "1058",
+    "question": "以下哪种基础油的润滑性评级为◎（最优）？",
+    "optionA": "矿物油",
+    "optionB": "PAO",
+    "optionC": "酯类油",
+    "optionD": "硅油",
+    "answer": "C"
+  },
+  {
+    "id": "1059",
+    "question": "以下哪种基础油的润滑性评级为×（最差）？",
+    "optionA": "矿物油",
+    "optionB": "PAO",
+    "optionC": "PAG",
+    "optionD": "硅油",
+    "answer": "D"
+  },
+  {
+    "id": "1060",
+    "question": "PAO的塑胶相容性评级为？",
+    "optionA": "×",
+    "optionB": "△",
+    "optionC": "○",
+    "optionD": "◎",
+    "answer": "D"
+  },
+  {
+    "id": "1061",
+    "question": "PAG的橡胶相容性评级为？",
+    "optionA": "×",
+    "optionB": "△",
+    "optionC": "○",
+    "optionD": "◎",
+    "answer": "D"
+  },
+  {
+    "id": "1062",
+    "question": "矿物油的耐热性能评级为？",
+    "optionA": "◎",
+    "optionB": "○",
+    "optionC": "△",
+    "optionD": "×",
+    "answer": "D"
+  },
+  {
+    "id": "1063",
+    "question": "以下哪种基础油在低温性能方面评级为◎？",
+    "optionA": "矿物油",
+    "optionB": "PAO",
+    "optionC": "酯类油",
+    "optionD": "以上都是",
+    "answer": "D"
+  },
+  {
+    "id": "1064",
+    "question": "矿物油的使用温度范围是？",
+    "optionA": "-40~160℃",
+    "optionB": "-30~120℃",
+    "optionC": "-50~140℃",
+    "optionD": "-60~160℃",
+    "answer": "B"
+  },
+  {
+    "id": "1065",
+    "question": "PAO的使用温度范围是？",
+    "optionA": "-30~120℃",
+    "optionB": "-50~140℃",
+    "optionC": "-60~160℃",
+    "optionD": "-60~280℃",
+    "answer": "B"
+  },
+  {
+    "id": "1066",
+    "question": "使用温度范围最宽的基础油是？",
+    "optionA": "矿物油",
+    "optionB": "硅油",
+    "optionC": "PAG",
+    "optionD": "PFPE",
+    "answer": "D"
+  },
+  {
+    "id": "1067",
+    "question": "酯类油的使用温度范围是？",
+    "optionA": "-30~120℃",
+    "optionB": "-50~140℃",
+    "optionC": "-60~160℃",
+    "optionD": "-40~160℃",
+    "answer": "C"
+  },
+  {
+    "id": "1068",
+    "question": "硅油的使用温度范围是？",
+    "optionA": "-60~160℃",
+    "optionB": "-60~280℃",
+    "optionC": "-70~360℃",
+    "optionD": "-40~160℃",
+    "answer": "B"
+  },
+  {
+    "id": "1069",
+    "question": "以下哪项不是PAO的特点？",
+    "optionA": "高粘度指数",
+    "optionB": "抗氧化优异",
+    "optionC": "生物降解性",
+    "optionD": "热稳定优异",
+    "answer": "C"
+  },
+  {
+    "id": "1070",
+    "question": "PAO可用于以下哪种产品？",
+    "optionA": "密封油/脂",
+    "optionB": "齿轮油",
+    "optionC": "真空泵油",
+    "optionD": "高温链条油",
+    "answer": "B"
+  },
+  {
+    "id": "1071",
+    "question": "以下哪项是酯类油的特点？",
+    "optionA": "极高粘度指数",
+    "optionB": "低表面引力",
+    "optionC": "生物降解性",
+    "optionD": "低挥发",
+    "answer": "C"
+  },
+  {
+    "id": "1072",
+    "question": "酯类油应用于以下哪种产品？",
+    "optionA": "食品级油/脂",
+    "optionB": "高温链条油",
+    "optionC": "密封油/脂",
+    "optionD": "真空泵油",
+    "answer": "B"
+  },
+  {
+    "id": "1073",
+    "question": "PAG的粘度指数特点是？",
+    "optionA": "高粘度指数",
+    "optionB": "极高粘度指数",
+    "optionC": "低粘度指数",
+    "optionD": "中等粘度指数",
+    "answer": "B"
+  },
+  {
+    "id": "1074",
+    "question": "以下哪项是PAG的特点？",
+    "optionA": "水解稳定",
+    "optionB": "生物降解性",
+    "optionC": "极优异抗磨",
+    "optionD": "与密封件相容性好",
+    "answer": "C"
+  },
+  {
+    "id": "1075",
+    "question": "PAG的应用包括以下哪种？",
+    "optionA": "食品级油/脂",
+    "optionB": "密封油/脂",
+    "optionC": "齿轮油",
+    "optionD": "高温脂",
+    "answer": "C"
+  },
+  {
+    "id": "1076",
+    "question": "硅油的以下哪项特性使其适合做密封油/脂？",
+    "optionA": "极优异抗磨",
+    "optionB": "与密封件相容性好",
+    "optionC": "生物降解性",
+    "optionD": "抗燃",
+    "answer": "B"
+  },
+  {
+    "id": "1077",
+    "question": "以下哪项不是硅油的特点？",
+    "optionA": "低挥发",
+    "optionB": "抗乳化",
+    "optionC": "抗燃",
+    "optionD": "稳定性好",
+    "answer": "C"
+  },
+  {
+    "id": "1078",
+    "question": "氟油（PFPE）的突出特点不包括？",
+    "optionA": "耐酸碱",
+    "optionB": "抗氧化优异",
+    "optionC": "极高粘度指数",
+    "optionD": "抗燃",
+    "answer": "C"
+  },
+  {
+    "id": "1079",
+    "question": "氟油应用于以下哪种场合？",
+    "optionA": "齿轮油",
+    "optionB": "空压机油",
+    "optionC": "真空泵油",
+    "optionD": "食品级油/脂",
+    "answer": "C"
+  },
+  {
+    "id": "1080",
+    "question": "矿物油的主要优势是？",
+    "optionA": "耐热性好",
+    "optionB": "低温性好",
+    "optionC": "廉价通用",
+    "optionD": "润滑性最优",
+    "answer": "C"
+  },
+  {
+    "id": "1081",
+    "question": "以下哪种基础油适合塑胶用途？",
+    "optionA": "矿物油",
+    "optionB": "酯类油",
+    "optionC": "硅油",
+    "optionD": "PAO",
+    "answer": "D"
+  },
+  {
+    "id": "1082",
+    "question": "以下哪种基础油适合橡胶用途？",
+    "optionA": "酯类油",
+    "optionB": "矿物油",
+    "optionC": "硅油",
+    "optionD": "PAG",
+    "answer": "D"
+  },
+  {
+    "id": "1083",
+    "question": "矿物油的橡胶相容性评级为？",
+    "optionA": "×",
+    "optionB": "△",
+    "optionC": "○",
+    "optionD": "◎",
+    "answer": "A"
+  },
+  {
+    "id": "1084",
+    "question": "PAG的润滑性评级为？",
+    "optionA": "×",
+    "optionB": "△",
+    "optionC": "○",
+    "optionD": "◎",
+    "answer": "B"
+  },
+  {
+    "id": "1085",
+    "question": "以下哪种基础油具有水解稳定的特点？",
+    "optionA": "矿物油",
+    "optionB": "PAO",
+    "optionC": "酯类油",
+    "optionD": "硅油",
+    "answer": "C"
+  },
+  {
+    "id": "1086",
+    "question": "矿物油与合成烃的相容性如何？",
+    "optionA": "不兼容",
+    "optionB": "互相安全",
+    "optionC": "仅单向兼容",
+    "optionD": "视温度而定",
+    "answer": "B"
+  },
+  {
+    "id": "1087",
+    "question": "酯类油与PAG的相容性如何？",
+    "optionA": "不兼容",
+    "optionB": "互相安全",
+    "optionC": "仅单向兼容",
+    "optionD": "视温度而定",
+    "answer": "B"
+  },
+  {
+    "id": "1088",
+    "question": "硅油与其他大多数基础油的相容性如何？",
+    "optionA": "互相安全",
+    "optionB": "不兼容",
+    "optionC": "视温度而定",
+    "optionD": "仅单向兼容",
+    "answer": "B"
+  },
+  {
+    "id": "1089",
+    "question": "PFPE仅与以下哪种基础油兼容？",
+    "optionA": "矿物油",
+    "optionB": "酯类油",
+    "optionC": "PAG",
+    "optionD": "PFPE自身",
+    "answer": "D"
+  },
+  {
+    "id": "1090",
+    "question": "以下哪组基础油之间互相安全兼容？",
+    "optionA": "硅油与PAO",
+    "optionB": "PFPE与矿物油",
+    "optionC": "矿物油与合成烃",
+    "optionD": "PFPE与酯类油",
+    "answer": "C"
+  },
+  {
+    "id": "1091",
+    "question": "润滑脂受压时释放润滑的原理是？",
+    "optionA": "添加剂分解",
+    "optionB": "稠化剂骨架释放基础油",
+    "optionC": "基础油蒸发",
+    "optionD": "温度升高",
+    "answer": "B"
+  },
+  {
+    "id": "1092",
+    "question": "PAO的低温性能评级为？",
+    "optionA": "×",
+    "optionB": "△",
+    "optionC": "○",
+    "optionD": "◎",
+    "answer": "D"
+  },
+  {
+    "id": "1093",
+    "question": "以下哪种基础油同时具有耐酸碱、耐高温、耐真空的特性？",
+    "optionA": "矿物油",
+    "optionB": "酯类油",
+    "optionC": "硅油",
+    "optionD": "PFPE",
+    "answer": "D"
+  },
+  {
+    "id": "1094",
+    "question": "PAG的使用温度下限是多少？",
+    "optionA": "-30℃",
+    "optionB": "-40℃",
+    "optionC": "-50℃",
+    "optionD": "-60℃",
+    "answer": "B"
+  },
+  {
+    "id": "1095",
+    "question": "硅油与以下哪种基础油兼容？",
+    "optionA": "PAO",
+    "optionB": "酯类油",
+    "optionC": "仅硅油自身",
+    "optionD": "矿物油",
+    "answer": "C"
+  },
+  {
+    "id": "1096",
+    "question": "润滑脂的初期旋转阻力特点为？",
+    "optionA": "小",
+    "optionB": "大",
+    "optionC": "无",
+    "optionD": "与润滑油相同",
+    "answer": "B"
+  },
+  {
+    "id": "1097",
+    "question": "以下哪种基础油不适合用于高速旋转场合？",
+    "optionA": "PAO",
+    "optionB": "酯类油",
+    "optionC": "润滑脂",
+    "optionD": "矿物油",
+    "answer": "C"
+  },
+  {
+    "id": "1098",
+    "question": "酯类油在以下哪个应用领域具有优势？",
+    "optionA": "食品级油/脂",
+    "optionB": "航空发动机油",
+    "optionC": "密封油/脂",
+    "optionD": "真空泵油",
+    "answer": "B"
+  },
+  {
+    "id": "1099",
+    "question": "以下哪种基础油具有抗燃特性？",
+    "optionA": "矿物油",
+    "optionB": "PAO",
+    "optionC": "酯类油",
+    "optionD": "PFPE",
+    "answer": "D"
+  },
+  {
+    "id": "1100",
+    "question": "润滑脂中基础油比例最接近的数值是？",
+    "optionA": "50%",
+    "optionB": "60%",
+    "optionC": "80%",
+    "optionD": "95%",
+    "answer": "C"
+  },
+  {
+    "id": "1101",
+    "question": "ACM(聚丙烯酸酯)橡胶与酯油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1102",
+    "question": "CR(聚氯丁烯)橡胶与PAG基础油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "完全相容",
+    "answer": "C"
+  },
+  {
+    "id": "1103",
+    "question": "EPDM(三元乙丙)橡胶与矿物油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "极度危险",
+    "answer": "C"
+  },
+  {
+    "id": "1104",
+    "question": "FKM(氟橡胶)与哪种基础油组合最安全？",
+    "optionA": "仅PFPE",
+    "optionB": "仅硅油",
+    "optionC": "仅矿物油",
+    "optionD": "所有基础油均安全",
+    "answer": "D"
+  },
+  {
+    "id": "1105",
+    "question": "FVMQ(氟硅橡胶)与硅油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "C"
+  },
+  {
+    "id": "1106",
+    "question": "IIR(丁基橡胶)与PFPE基础油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1107",
+    "question": "NBR(丁腈橡胶)与矿物油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1108",
+    "question": "SBR(丁苯橡胶)与硅油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1109",
+    "question": "NR(天然橡胶)与合成烃基础油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "C"
+  },
+  {
+    "id": "1110",
+    "question": "以下哪种橡胶与酯油为↓请勿尝试？",
+    "optionA": "ACM",
+    "optionB": "NBR",
+    "optionC": "CR",
+    "optionD": "FVMQ",
+    "answer": "C"
+  },
+  {
+    "id": "1111",
+    "question": "以下哪种橡胶与PAG基础油为●可能无法工作？",
+    "optionA": "NBR",
+    "optionB": "SBR",
+    "optionC": "IIR",
+    "optionD": "ACM",
+    "answer": "A"
+  },
+  {
+    "id": "1112",
+    "question": "以下哪种基础油与EPDM橡胶为↑安全？",
+    "optionA": "矿物油",
+    "optionB": "合成烃",
+    "optionC": "PAG",
+    "optionD": "酯油",
+    "answer": "C"
+  },
+  {
+    "id": "1113",
+    "question": "以下哪种橡胶与所有6种基础油均为↑安全？",
+    "optionA": "ACM",
+    "optionB": "CR",
+    "optionC": "FKM",
+    "optionD": "NBR",
+    "answer": "C"
+  },
+  {
+    "id": "1114",
+    "question": "以下哪种橡胶与矿物油为↑安全且与酯油为●可能无法工作？",
+    "optionA": "EPDM",
+    "optionB": "ACM",
+    "optionC": "IIR",
+    "optionD": "SBR",
+    "answer": "B"
+  },
+  {
+    "id": "1115",
+    "question": "PFPE基础油对塑胶材料的相容性总体如何？",
+    "optionA": "对几乎所有塑料都安全",
+    "optionB": "对多数塑料有侵蚀",
+    "optionC": "仅对PTFE安全",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1116",
+    "question": "硅油基础油对塑胶材料的相容性总体如何？",
+    "optionA": "对几乎所有塑料都安全",
+    "optionB": "对多数塑料有侵蚀",
+    "optionC": "仅对PEEK安全",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1117",
+    "question": "酯油对以下哪种塑料为↓侵蚀？",
+    "optionA": "PTFE",
+    "optionB": "PEEK",
+    "optionC": "PC",
+    "optionD": "PA(尼龙)",
+    "answer": "C"
+  },
+  {
+    "id": "1118",
+    "question": "PTFE塑料与所有基础油的相容性如何？",
+    "optionA": "↑相容",
+    "optionB": "●可能无法工作",
+    "optionC": "↓不相容",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1119",
+    "question": "PEEK塑料与所有基础油的相容性如何？",
+    "optionA": "↑相容",
+    "optionB": "●可能无法工作",
+    "optionC": "↓不相容",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1120",
+    "question": "ABS塑料与矿物油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1121",
+    "question": "PA(尼龙)塑料与酯油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1122",
+    "question": "POM塑料与PAG基础油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1123",
+    "question": "PVC塑料与PFPE基础油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1124",
+    "question": "以下哪种塑料与酯油为↓侵蚀？",
+    "optionA": "PA(尼龙)",
+    "optionB": "POM",
+    "optionC": "PVC",
+    "optionD": "PTFE",
+    "answer": "C"
+  },
+  {
+    "id": "1125",
+    "question": "以下哪种塑料与矿物油为●可能无法工作？",
+    "optionA": "PA(尼龙)",
+    "optionB": "POM",
+    "optionC": "PC",
+    "optionD": "PFPE",
+    "answer": "C"
+  },
+  {
+    "id": "1126",
+    "question": "PC塑料与硅油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1127",
+    "question": "POM塑料与合成烃基础油的相容性如何？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1128",
+    "question": "以下哪种稠化剂属于非皂基类？",
+    "optionA": "锂基",
+    "optionB": "复合铝基",
+    "optionC": "聚脲",
+    "optionD": "复合钠基",
+    "answer": "C"
+  },
+  {
+    "id": "1129",
+    "question": "以下哪种稠化剂属于皂基类？",
+    "optionA": "膨润土",
+    "optionB": "无定形硅",
+    "optionC": "PTFE",
+    "optionD": "铝基",
+    "answer": "D"
+  },
+  {
+    "id": "1130",
+    "question": "皂基类稠化剂共有几种？",
+    "optionA": "9种",
+    "optionB": "10种",
+    "optionC": "4种",
+    "optionD": "13种",
+    "answer": "A"
+  },
+  {
+    "id": "1131",
+    "question": "非皂基类稠化剂共有几种？",
+    "optionA": "4种",
+    "optionB": "9种",
+    "optionC": "13种",
+    "optionD": "3种",
+    "answer": "A"
+  },
+  {
+    "id": "1132",
+    "question": "以下哪种不是非皂基稠化剂？",
+    "optionA": "聚脲",
+    "optionB": "膨润土",
+    "optionC": "复合钙基",
+    "optionD": "无定形硅",
+    "answer": "C"
+  },
+  {
+    "id": "1133",
+    "question": "锂基润滑脂的滴点范围是？",
+    "optionA": "80-100℃",
+    "optionB": "170-200℃",
+    "optionC": "230-250℃",
+    "optionD": ">250℃",
+    "answer": "B"
+  },
+  {
+    "id": "1134",
+    "question": "钙基润滑脂的滴点范围是？",
+    "optionA": "80-100℃",
+    "optionB": "100-120℃",
+    "optionC": "170-200℃",
+    "optionD": "230-250℃",
+    "answer": "A"
+  },
+  {
+    "id": "1135",
+    "question": "复合锂基润滑脂的滴点范围是？",
+    "optionA": "170-200℃",
+    "optionB": "200-240℃",
+    "optionC": "230-250℃",
+    "optionD": ">300℃",
+    "answer": "C"
+  },
+  {
+    "id": "1136",
+    "question": "铝基润滑脂的滴点范围是？",
+    "optionA": "80-100℃",
+    "optionB": "100-120℃",
+    "optionC": "170-200℃",
+    "optionD": "200-260℃",
+    "answer": "B"
+  },
+  {
+    "id": "1137",
+    "question": "以下哪种润滑脂没有滴点？",
+    "optionA": "锂基",
+    "optionB": "复合铝基",
+    "optionC": "膨润土",
+    "optionD": "复合锂基",
+    "answer": "C"
+  },
+  {
+    "id": "1138",
+    "question": "聚脲基润滑脂的滴点范围是？",
+    "optionA": "170-200℃",
+    "optionB": "230-250℃",
+    "optionC": ">250℃",
+    "optionD": ">300℃",
+    "answer": "C"
+  },
+  {
+    "id": "1139",
+    "question": "复合磺酸钙基润滑脂的滴点范围是？",
+    "optionA": ">250℃",
+    "optionB": "200-240℃",
+    "optionC": ">300℃",
+    "optionD": "230-250℃",
+    "answer": "C"
+  },
+  {
+    "id": "1140",
+    "question": "PTFE作为稠化剂的润滑脂滴点情况如何？",
+    "optionA": "170-200℃",
+    "optionB": "230-250℃",
+    "optionC": "无滴点",
+    "optionD": ">300℃",
+    "answer": "C"
+  },
+  {
+    "id": "1141",
+    "question": "以下哪种稠化剂与所有其他稠化剂都完全相容？",
+    "optionA": "锂基",
+    "optionB": "膨润土",
+    "optionC": "无定形硅",
+    "optionD": "复合钠基",
+    "answer": "C"
+  },
+  {
+    "id": "1142",
+    "question": "以下哪种稠化剂与所有其他稠化剂都完全相容？",
+    "optionA": "PTFE",
+    "optionB": "磺酸钙基",
+    "optionC": "铝基",
+    "optionD": "复合锂基",
+    "answer": "A"
+  },
+  {
+    "id": "1143",
+    "question": "磺酸钙基稠化剂与铝基稠化剂的相容性如何？",
+    "optionA": "完全相容",
+    "optionB": "不相容",
+    "optionC": "部分相容",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1144",
+    "question": "磺酸钙基稠化剂与膨润土稠化剂的相容性如何？",
+    "optionA": "完全相容",
+    "optionB": "不相容",
+    "optionC": "部分相容",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1145",
+    "question": "锂基稠化剂与复合钠基稠化剂的相容性如何？",
+    "optionA": "完全相容",
+    "optionB": "不相容",
+    "optionC": "部分相容",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1146",
+    "question": "以下哪种稠化剂组合是最危险的不相容组合？",
+    "optionA": "锂基-复合铝基",
+    "optionB": "锂基-复合钠基",
+    "optionC": "聚脲-膨润土",
+    "optionD": "复合锂基-无定形硅",
+    "answer": "B"
+  },
+  {
+    "id": "1147",
+    "question": "复合铝基润滑脂的滴点范围是？",
+    "optionA": "100-120℃",
+    "optionB": "170-200℃",
+    "optionC": "200-260℃",
+    "optionD": "230-250℃",
+    "answer": "C"
+  },
+  {
+    "id": "1148",
+    "question": "复合钡基润滑脂的滴点范围是？",
+    "optionA": "170-200℃",
+    "optionB": "200-240℃",
+    "optionC": "230-250℃",
+    "optionD": ">300℃",
+    "answer": "B"
+  },
+  {
+    "id": "1149",
+    "question": "EPDM橡胶与PAG基础油、硅油、PFPE基础油的相容性均为？",
+    "optionA": "↑安全",
+    "optionB": "●可能无法工作",
+    "optionC": "↓请勿尝试",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1150",
+    "question": "以下哪种塑料与PAG基础油为↓请勿尝试？",
+    "optionA": "PA(尼龙)",
+    "optionB": "POM",
+    "optionC": "ABS",
+    "optionD": "PC",
+    "answer": "D"
+  },
+  {
+    "id": "1151",
+    "question": "铝基稠化剂的使用温度上限是多少？",
+    "optionA": "<80℃",
+    "optionB": "<110℃",
+    "optionC": "<135℃",
+    "optionD": "<175℃",
+    "answer": "A"
+  },
+  {
+    "id": "1152",
+    "question": "复合铝基稠化剂与PAG基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "部分相容",
+    "answer": "B"
+  },
+  {
+    "id": "1153",
+    "question": "无定形硅稠化剂的使用温度上限是多少？",
+    "optionA": "<175℃",
+    "optionB": "<200℃",
+    "optionC": "<275℃",
+    "optionD": "<300℃",
+    "answer": "D"
+  },
+  {
+    "id": "1154",
+    "question": "以下哪种稠化剂与所有基础油完全安全相容？",
+    "optionA": "铝基",
+    "optionB": "钙基",
+    "optionC": "无定形硅",
+    "optionD": "复合钠基",
+    "answer": "C"
+  },
+  {
+    "id": "1155",
+    "question": "PTFE稠化剂的使用温度上限是多少？",
+    "optionA": "<200℃",
+    "optionB": "<250℃",
+    "optionC": "<275℃",
+    "optionD": "<300℃",
+    "answer": "C"
+  },
+  {
+    "id": "1156",
+    "question": "锂基稠化剂与PFPE基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1157",
+    "question": "复合锂基稠化剂与PAG基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1158",
+    "question": "以下哪种稠化剂除矿物油、合成烃、酯油外，还能与PAG和硅油安全相容？",
+    "optionA": "聚脲",
+    "optionB": "钙基",
+    "optionC": "锂基",
+    "optionD": "复合钠基",
+    "answer": "C"
+  },
+  {
+    "id": "1159",
+    "question": "复合钡基稠化剂的使用温度上限是多少？",
+    "optionA": "<110℃",
+    "optionB": "<125℃",
+    "optionC": "<135℃",
+    "optionD": "<175℃",
+    "answer": "C"
+  },
+  {
+    "id": "1160",
+    "question": "膨润土稠化剂与硅油基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1161",
+    "question": "钙基稠化剂的使用温度上限是多少？",
+    "optionA": "<80℃",
+    "optionB": "<110℃",
+    "optionC": "<125℃",
+    "optionD": "<135℃",
+    "answer": "B"
+  },
+  {
+    "id": "1162",
+    "question": "磺酸钙基稠化剂与酯油基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1163",
+    "question": "聚脲稠化剂与PFPE基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1164",
+    "question": "复合钠基稠化剂的使用温度上限是多少？",
+    "optionA": "<110℃",
+    "optionB": "<125℃",
+    "optionC": "<135℃",
+    "optionD": "<175℃",
+    "answer": "B"
+  },
+  {
+    "id": "1165",
+    "question": "复合钙基稠化剂与矿物油基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1166",
+    "question": "以下哪种稠化剂的使用温度上限最高？",
+    "optionA": "聚脲",
+    "optionB": "PTFE",
+    "optionC": "无定形硅",
+    "optionD": "复合锂基",
+    "answer": "C"
+  },
+  {
+    "id": "1167",
+    "question": "复合铝基稠化剂的使用温度上限是多少？",
+    "optionA": "<80℃",
+    "optionB": "<135℃",
+    "optionC": "<175℃",
+    "optionD": "<200℃",
+    "answer": "C"
+  },
+  {
+    "id": "1168",
+    "question": "除无定形硅和PTFE外，还有哪两种稠化剂可与PAG和硅油相容？",
+    "optionA": "铝基和复合铝基",
+    "optionB": "钙基和复合钙基",
+    "optionC": "锂基和复合锂基",
+    "optionD": "聚脲和膨润土",
+    "answer": "C"
+  },
+  {
+    "id": "1169",
+    "question": "磺酸钙基稠化剂的使用温度上限是多少？",
+    "optionA": "<135℃",
+    "optionB": "<175℃",
+    "optionC": "<200℃",
+    "optionD": "<275℃",
+    "answer": "B"
+  },
+  {
+    "id": "1170",
+    "question": "以下哪种基础油与绝大多数皂基稠化剂都不相容？",
+    "optionA": "矿物油",
+    "optionB": "合成烃",
+    "optionC": "PFPE",
+    "optionD": "酯油",
+    "answer": "C"
+  },
+  {
+    "id": "1171",
+    "question": "膨润土稠化剂的使用温度上限是多少？",
+    "optionA": "<135℃",
+    "optionB": "<175℃",
+    "optionC": "<200℃",
+    "optionD": "<275℃",
+    "answer": "C"
+  },
+  {
+    "id": "1172",
+    "question": "复合锂基稠化剂与硅油基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "A"
+  },
+  {
+    "id": "1173",
+    "question": "铝基稠化剂与PFPE基础油的相容性如何？",
+    "optionA": "相容",
+    "optionB": "不相容",
+    "optionC": "全安全",
+    "optionD": "不确定",
+    "answer": "B"
+  },
+  {
+    "id": "1174",
+    "question": "聚脲稠化剂的使用温度上限是多少？",
+    "optionA": "<175℃",
+    "optionB": "<200℃",
+    "optionC": "<250℃",
+    "optionD": "<275℃",
+    "answer": "B"
+  },
+  {
+    "id": "1175",
+    "question": "以下哪种稠化剂与PAG基础油相容？",
+    "optionA": "钙基",
+    "optionB": "复合钠基",
+    "optionC": "锂基",
+    "optionD": "聚脲",
+    "answer": "C"
+  },
+  {
+    "id": "1176",
+    "question": "油性剂的主要作用是什么？",
+    "optionA": "抑制氧化劣化",
+    "optionB": "防止金属表面生锈",
+    "optionC": "摩擦面形成物理或化学密致分子膜抑制直接接触",
+    "optionD": "改善粘附性能",
+    "answer": "C"
+  },
+  {
+    "id": "1177",
+    "question": "极压抗磨剂的主要作用是什么？",
+    "optionA": "与金属表面反应形成边界润滑膜防止磨损和烧结",
+    "optionB": "抑制氧化劣化",
+    "optionC": "强力粘附金属表面",
+    "optionD": "改善粘附性能",
+    "answer": "A"
+  },
+  {
+    "id": "1178",
+    "question": "固体添加剂的主要作用是什么？",
+    "optionA": "摩擦面形成密致分子膜",
+    "optionB": "强力粘附金属表面防止接触降低摩擦磨损",
+    "optionC": "抑制氧化劣化",
+    "optionD": "防止金属表面生锈",
+    "answer": "B"
+  },
+  {
+    "id": "1179",
+    "question": "抗氧剂的主要作用是什么？",
+    "optionA": "防止金属表面生锈",
+    "optionB": "抑制促进氧化的金属新生面产生",
+    "optionC": "抑制氧化劣化保持初始性能",
+    "optionD": "改善粘附性能",
+    "answer": "C"
+  },
+  {
+    "id": "1180",
+    "question": "增粘剂的主要作用是什么？",
+    "optionA": "抑制氧化劣化",
+    "optionB": "防止金属表面生锈",
+    "optionC": "改善粘附性能",
+    "optionD": "形成边界润滑膜",
+    "answer": "C"
+  },
+  {
+    "id": "1181",
+    "question": "防锈剂的主要作用是什么？",
+    "optionA": "抑制氧化劣化",
+    "optionB": "防止金属表面生锈",
+    "optionC": "抑制金属新生面产生",
+    "optionD": "改善粘附性能",
+    "answer": "B"
+  },
+  {
+    "id": "1182",
+    "question": "金属钝化剂的主要作用是什么？",
+    "optionA": "防止金属表面生锈",
+    "optionB": "抑制氧化劣化",
+    "optionC": "改善粘附性能",
+    "optionD": "抑制促进氧化的金属新生面和金属熔体产生",
+    "answer": "D"
+  },
+  {
+    "id": "1183",
+    "question": "以下哪种添加剂负责与金属表面反应形成边界润滑膜？",
+    "optionA": "油性剂",
+    "optionB": "极压抗磨剂",
+    "optionC": "抗氧剂",
+    "optionD": "增粘剂",
+    "answer": "B"
+  },
+  {
+    "id": "1184",
+    "question": "二硫化钼MoS₂的颜色和特性是什么？",
+    "optionA": "白色，低摩擦性",
+    "optionB": "灰黑色，耐负荷性+耐磨耗性",
+    "optionC": "黑色，低摩擦性",
+    "optionD": "黄色/绿色，耐磨耗性",
+    "answer": "B"
+  },
+  {
+    "id": "1185",
+    "question": "石墨的颜色和特性是什么？",
+    "optionA": "灰黑色，耐负荷性+耐磨耗性",
+    "optionB": "白色，低摩擦性",
+    "optionC": "黑色，低摩擦性",
+    "optionD": "白色，高温下润滑性",
+    "answer": "C"
+  },
+  {
+    "id": "1186",
+    "question": "聚四氟乙烯PTFE固体添加剂的颜色和特性是什么？",
+    "optionA": "灰黑色，耐负荷性",
+    "optionB": "黑色，低摩擦性",
+    "optionC": "白色，低摩擦性",
+    "optionD": "白色，耐负荷性+耐磨耗性",
+    "answer": "C"
+  },
+  {
+    "id": "1187",
+    "question": "MCA固体添加剂的颜色和特性是什么？",
+    "optionA": "白色，耐负荷性+耐磨耗性",
+    "optionB": "白色，低摩擦性",
+    "optionC": "白色，高温下润滑性",
+    "optionD": "金属色，高温下烧结防止性",
+    "answer": "A"
+  },
+  {
+    "id": "1188",
+    "question": "氮化硼的颜色和特性是什么？",
+    "optionA": "白色，低摩擦性",
+    "optionB": "白色，耐负荷性+耐磨耗性",
+    "optionC": "白色，高温下润滑性",
+    "optionD": "金属色，高温下烧结防止性",
+    "answer": "C"
+  },
+  {
+    "id": "1189",
+    "question": "金属粉末（铜、镍）固体添加剂的颜色和特性是什么？",
+    "optionA": "白色，高温下润滑性",
+    "optionB": "金属色，高温下烧结防止性",
+    "optionC": "黄色/绿色，耐磨耗性",
+    "optionD": "灰黑色，耐负荷性+耐磨耗性",
+    "answer": "B"
+  },
+  {
+    "id": "1190",
+    "question": "有机钼固体添加剂的颜色和特性是什么？",
+    "optionA": "灰黑色，耐负荷性+耐磨耗性",
+    "optionB": "黑色，低摩擦性",
+    "optionC": "白色，低摩擦性",
+    "optionD": "黄色/绿色，耐磨耗性",
+    "answer": "D"
+  },
+  {
+    "id": "1191",
+    "question": "以下哪种固体添加剂为灰黑色？",
+    "optionA": "石墨",
+    "optionB": "MCA",
+    "optionC": "二硫化钼MoS₂",
+    "optionD": "氮化硼",
+    "answer": "C"
+  },
+  {
+    "id": "1192",
+    "question": "以下哪种固体添加剂具有高温下润滑性？",
+    "optionA": "石墨",
+    "optionB": "MCA",
+    "optionC": "聚四氟乙烯PTFE",
+    "optionD": "氮化硼",
+    "answer": "D"
+  },
+  {
+    "id": "1193",
+    "question": "以下哪种固体添加剂具有高温下烧结防止性？",
+    "optionA": "二硫化钼MoS₂",
+    "optionB": "金属粉末（铜、镍）",
+    "optionC": "有机钼",
+    "optionD": "石墨",
+    "answer": "B"
+  },
+  {
+    "id": "1194",
+    "question": "润滑脂生产工艺中，工序1（反应/皂化）使用的设备是什么？",
+    "optionA": "搅拌器",
+    "optionB": "均质机",
+    "optionC": "反应釜",
+    "optionD": "泡脱槽",
+    "answer": "C"
+  },
+  {
+    "id": "1195",
+    "question": "工序1（反应/皂化）的主要目的是什么？",
+    "optionA": "剪切分散改善细腻均匀",
+    "optionB": "真空脱除气泡",
+    "optionC": "过滤杂质后灌装",
+    "optionD": "生成稠化剂骨架",
+    "answer": "D"
+  },
+  {
+    "id": "1196",
+    "question": "工序2（混合）使用的设备是什么？",
+    "optionA": "反应釜",
+    "optionB": "搅拌器",
+    "optionC": "均质机",
+    "optionD": "泡脱槽",
+    "answer": "B"
+  },
+  {
+    "id": "1197",
+    "question": "工序3（均质）使用的设备是什么？",
+    "optionA": "反应釜",
+    "optionB": "搅拌器",
+    "optionC": "均质机+研磨设备",
+    "optionD": "泡脱槽(真空釜)",
+    "answer": "C"
+  },
+  {
+    "id": "1198",
+    "question": "工序4（泡脱）的主要目的是什么？",
+    "optionA": "剪切分散改善细腻均匀",
+    "optionB": "真空脱除气泡防气孔氧化",
+    "optionC": "过滤杂质后灌装",
+    "optionD": "生成稠化剂骨架",
+    "answer": "B"
+  },
+  {
+    "id": "1199",
+    "question": "润滑脂生产工艺中最后一个工序是什么？",
+    "optionA": "均质",
+    "optionB": "泡脱",
+    "optionC": "充填",
+    "optionD": "混合",
+    "answer": "C"
+  },
+  {
+    "id": "1200",
+    "question": "以下哪种属于皂基纤维结构的稠化剂？",
+    "optionA": "聚脲",
+    "optionB": "膨润土",
+    "optionC": "复合锂基",
+    "optionD": "PTFE",
+    "answer": "C"
+  }
+];
+
+// ======== STATE ========
+let currentMode = "practice";
+let currentIndex = 0;
+let sessionQuestions = [];
+let sessionAnswers = {};
+let sessionScore = { correct: 0, wrong: 0 };
+let sessionStartTime = null;
+let examTimer = null;
+let examRemain = 0;
+
+const CATEGORIES = ["检测指标", "基础油知识", "相容性", "稠化剂/添加剂/工艺"];
+const CAT_COLORS = ["#2980b9", "#27ae60", "#e67e22", "#8e44ad"];
+
+function getCategory(q) {
+  const id = parseInt(q.id);
+  if (id <= 1050) return "检测指标";
+  if (id <= 1100) return "基础油知识";
+  if (id <= 1150) return "相容性";
+  return "稠化剂/添加剂/工艺";
+}
+
+// ======== STORAGE ========
+const STORAGE_KEY = "vnovo_quiz_data_v2";
+
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); }
+function getData() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    return d ? JSON.parse(d) : { history: [], wrong: [] };
+  } catch(e) { return { history: [], wrong: [] }; }
+}
+
+function addRecord(type, total, correct, time) {
+  const data = getData();
+  data.history.push({ type, total, correct, time, date: new Date().toLocaleDateString() });
+  if (data.history.length > 500) data.history = data.history.slice(-500);
+  saveData();
+}
+
+function addWrong(qId) {
+  const data = getData();
+  if (!data.wrong.includes(qId)) { data.wrong.push(qId); saveData(); }
+}
+
+function removeWrong(qId) {
+  const data = getData();
+  data.wrong = data.wrong.filter(id => id !== qId);
+  saveData();
+}
+
+// ======== UTILS ========
+function getQuestionById(id) { return ALL_QUESTIONS.find(q => q.id === id); }
+function keyMap(a) { return { A: "optionA", B: "optionB", C: "optionC", D: "optionD" }[a]; }
+function formatTime(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+// ======== NAVIGATION ========
+function switchPage(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  const el = document.getElementById("page-" + page);
+  if (el) el.classList.add("active");
+  document.querySelectorAll(".tab").forEach(t => { if (t.dataset.page === page) t.classList.add("active"); });
+
+  if (page === "home") renderHome();
+  if (page === "practice") initPractice();
+  if (page === "random") document.getElementById("random-setup").classList.remove("hidden");
+  if (page === "exam") document.getElementById("exam-setup").classList.remove("hidden");
+  if (page === "wrong") renderWrong();
+  if (page === "stats") renderStats();
+}
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => switchPage(t.dataset.page));
+});
+
+// ======== HOME ========
+function renderHome() {
+  const data = getData();
+  const td = data.history.reduce((s, r) => s + r.total, 0);
+  const tc = data.history.reduce((s, r) => s + r.correct, 0);
+  const acc = td > 0 ? Math.round(tc / td * 100) : 0;
+
+  document.getElementById("home-stats").innerHTML =
+    '<div class="stat-card"><div class="stat-value blue">' + td + '</div><div class="stat-label">累计做题</div></div>' +
+    '<div class="stat-card"><div class="stat-value green">' + tc + '</div><div class="stat-label">答对题数</div></div>' +
+    '<div class="stat-card"><div class="stat-value orange">' + acc + '%</div><div class="stat-label">正确率</div></div>' +
+    '<div class="stat-card"><div class="stat-value red">' + data.wrong.length + '</div><div class="stat-label">错题数量</div></div>';
+}
+
+// ======== PRACTICE ========
+let practiceFilter = "all";
+
+function initPractice() {
+  currentIndex = 0;
+  const el = document.getElementById("practice-filter");
+  let h = '<button class="filter-btn ' + (practiceFilter === "all" ? "active" : "") + '" data-cat="all">全部</button>';
+  CATEGORIES.forEach(c => {
+    h += '<button class="filter-btn ' + (practiceFilter === c ? "active" : "") + '" data-cat="' + c + '">' + c + '</button>';
+  });
+  el.innerHTML = h;
+  el.querySelectorAll(".filter-btn").forEach(b => {
+    b.addEventListener("click", () => { practiceFilter = b.dataset.cat; initPractice(); });
+  });
+
+  let qs = ALL_QUESTIONS;
+  if (practiceFilter !== "all") qs = qs.filter(q => getCategory(q) === practiceFilter);
+
+  sessionQuestions = qs;
+  sessionAnswers = {};
+  sessionScore = { correct: 0, wrong: 0 };
+  sessionStartTime = Date.now();
+  currentMode = "practice";
+  renderQuestion();
+}
+
+// ======== RENDER QUESTION ========
+function renderQuestion() {
+  if (currentIndex >= sessionQuestions.length) { showResult(); return; }
+
+  const q = sessionQuestions[currentIndex];
+  const cat = getCategory(q);
+  const ci = CATEGORIES.indexOf(cat);
+  const progress = (currentIndex / sessionQuestions.length * 100).toFixed(1);
+  const answered = sessionAnswers[q.id] !== undefined;
+  const area = currentMode === "practice" ? "practice-area" : currentMode === "random" ? "random-area" : "exam-area";
+
+  let oh = "";
+  ["A", "B", "C", "D"].forEach((lbl, i) => {
+    const key = ["optionA", "optionB", "optionC", "optionD"][i];
+    const val = q[key];
+    let cls = "";
+    if (answered) {
+      if (lbl === q.answer) cls = "correct";
+      else if (sessionAnswers[q.id] === lbl) cls = "wrong";
+      cls += " disabled";
+    }
+    oh += '<div class="option ' + cls + '" data-qid="' + q.id + '" data-lbl="' + lbl + '">' +
+          '<span class="option-label">' + lbl + '</span><span>' + val + '</span></div>';
+  });
+
+  let timerHtml = "";
+  if (currentMode === "exam") {
+    timerHtml = '<span style="color:#e74c3c;font-weight:600">⏱ ' + formatTime(examRemain) + '</span>';
+  }
+
+  let expHtml = "";
+  if (answered) {
+    const ansKey = keyMap(q.answer);
+    expHtml = '<div class="explanation show">💡 正确答案: ' + q.answer + '. ' + q[ansKey] +
+              (q.explanation ? '<br>' + q.explanation : '') + '</div>';
+  }
+
+  document.getElementById(area).innerHTML =
+    '<div class="card">' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+    '<div class="question-header">' +
+    '<span class="question-number">第 ' + (currentIndex + 1) + ' / ' + sessionQuestions.length + ' 题</span>' +
+    '<span class="category-tag" style="background:' + CAT_COLORS[ci] + '20;color:' + CAT_COLORS[ci] + '">' + cat + '</span>' +
+    timerHtml +
+    '</div>' +
+    '<div class="question-text">' + q.question + '</div>' +
+    '<div class="options">' + oh + '</div>' +
+    expHtml +
+    '<div class="btn-row">' +
+    '<button class="btn btn-outline" id="prev-btn"' + (currentIndex === 0 ? ' disabled' : '') + '>⬅ 上一题</button>' +
+    '<button class="btn ' + (answered && currentIndex < sessionQuestions.length - 1 ? 'btn-primary' : 'btn-success') + '" id="next-btn"' + (!answered ? ' disabled' : '') + '>' +
+    (currentIndex === sessionQuestions.length - 1 ? '✅ 提交' : '下一题 ➡') +
+    '</button></div></div>';
+
+  // Bind option clicks
+  document.getElementById(area).querySelectorAll(".option:not(.disabled)").forEach(o => {
+    o.addEventListener("click", () => selectOpt(o.dataset.qid, o.dataset.lbl));
+  });
+
+  // Bind nav buttons
+  document.getElementById("prev-btn").addEventListener("click", prevQ);
+  document.getElementById("next-btn").addEventListener("click", nextQ);
+}
+
+// ======== ANSWER LOGIC ========
+function selectOpt(qId, lbl) {
+  if (sessionAnswers[qId] !== undefined) return;
+  sessionAnswers[qId] = lbl;
+  const q = getQuestionById(qId);
+  if (lbl === q.answer) {
+    sessionScore.correct++;
+    showToast("✅ 回答正确！");
+  } else {
+    sessionScore.wrong++;
+    addWrong(qId);
+    showToast("❌ 回答错误，正确答案是 " + q.answer);
+  }
+  renderQuestion();
+}
+
+function prevQ() { if (currentIndex > 0) { currentIndex--; renderQuestion(); } }
+
+function nextQ() {
+  if (sessionAnswers[sessionQuestions[currentIndex].id] === undefined) return;
+  if (currentIndex < sessionQuestions.length - 1) { currentIndex++; renderQuestion(); }
+  else showResult();
+}
+
+// ======== RANDOM ========
+function startRandom(n) {
+  currentMode = "random";
+  document.getElementById("random-setup").classList.add("hidden");
+  const s = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
+  sessionQuestions = s.slice(0, Math.min(n, ALL_QUESTIONS.length));
+  currentIndex = 0; sessionAnswers = {}; sessionScore = { correct: 0, wrong: 0 }; sessionStartTime = Date.now();
+  showToast("🎲 已随机抽取 " + sessionQuestions.length + " 题");
+  renderQuestion();
+}
+
+// ======== EXAM ========
+function startExam() {
+  currentMode = "exam";
+  document.getElementById("exam-setup").classList.add("hidden");
+  const cnt = parseInt(document.getElementById("exam-count").value);
+  const perQ = parseInt(document.getElementById("exam-time").value);
+  const s = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
+  sessionQuestions = s.slice(0, Math.min(cnt, ALL_QUESTIONS.length));
+  currentIndex = 0; sessionAnswers = {}; sessionScore = { correct: 0, wrong: 0 }; sessionStartTime = Date.now();
+  examRemain = cnt * perQ;
+  if (examTimer) clearInterval(examTimer);
+  examTimer = setInterval(() => {
+    examRemain--;
+    if (examRemain <= 0) { clearInterval(examTimer); examTimer = null; showToast("⏰ 时间到！自动提交"); showResult(); return; }
+    if (currentIndex < sessionQuestions.length) renderQuestion();
+  }, 1000);
+  showToast("📋 考试开始！共 " + sessionQuestions.length + " 题");
+  renderQuestion();
+}
+
+// ======== RESULT ========
+function showResult() {
+  if (examTimer) { clearInterval(examTimer); examTimer = null; }
+  const elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
+  const total = sessionQuestions.length;
+  const correct = sessionScore.correct;
+  const accuracy = Math.round(correct / total * 100);
+  const type = currentMode === "practice" ? "顺序刷题" : currentMode === "random" ? "随机刷题" : "模拟考试";
+
+  addRecord(type, total, correct, elapsed);
+
+  // Remove from wrong list if answered correctly
+  const data = getData();
+  sessionQuestions.forEach(q => {
+    if (sessionAnswers[q.id] === q.answer && data.wrong.includes(q.id)) removeWrong(q.id);
+  });
+
+  const area = currentMode === "practice" ? "practice-area" : currentMode === "random" ? "random-area" : "exam-area";
+
+  let wh = "";
+  sessionQuestions.forEach(q => {
+    if (sessionAnswers[q.id] !== q.answer) {
+      wh += '<div class="wrong-item"><div class="wrong-q">❌ ' + q.question + '</div>' +
+            '<div class="wrong-a">你的答案: ' + (sessionAnswers[q.id] || "未作答") + ' | 正确答案: ' + q.answer + ' (' + q[keyMap(q.answer)] + ')</div></div>';
+    }
+  });
+
+  document.getElementById(area).innerHTML =
+    '<div class="card">' +
+    '<div class="result-header">' +
+    '<div class="result-score">' + accuracy + '<span style="font-size:24px">%</span></div>' +
+    '<div class="result-label">正确率 · ' + type + '</div>' +
+    '<p style="margin-top:10px;color:#666">答对 ' + correct + '/' + total + ' 题 · 用时 ' + formatTime(elapsed) + '</p>' +
+    '</div>' +
+    '<div class="stats-grid">' +
+    '<div class="stat-card"><div class="stat-value green">' + correct + '</div><div class="stat-label">答对</div></div>' +
+    '<div class="stat-card"><div class="stat-value red">' + sessionScore.wrong + '</div><div class="stat-label">答错</div></div>' +
+    '<div class="stat-card"><div class="stat-value blue">' + formatTime(elapsed) + '</div><div class="stat-label">用时</div></div>' +
+    '<div class="stat-card"><div class="stat-value orange">' + accuracy + '%</div><div class="stat-label">正确率</div></div>' +
+    '</div>' +
+    (wh ? '<div class="chart-title" style="margin-top:15px">❌ 本次答错的题目 (' + sessionScore.wrong + '题)</div>' + wh
+        : '<div style="text-align:center;padding:20px;color:#27ae60;font-size:18px">🎉 全部答对！太棒了！</div>') +
+    '<div class="btn-row" style="justify-content:center;margin-top:25px">' +
+    '<button class="btn btn-primary" id="back-home-btn">🏠 返回首页</button>' +
+    '<button class="btn btn-success" id="retry-btn">🔄 再来一次</button></div></div>';
+
+  document.getElementById("back-home-btn").addEventListener("click", () => switchPage("home"));
+  document.getElementById("retry-btn").addEventListener("click", () => location.reload());
+}
+
+// ======== WRONG BOOK ========
+function renderWrong() {
+  const data = getData();
+  const area = document.getElementById("wrong-area");
+  if (!data.wrong.length) {
+    area.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>暂无错题，继续加油！</p></div>';
+    return;
+  }
+
+  let h = '<div class="card"><div class="chart-title">❌ 错题本（' + data.wrong.length + '题）</div>';
+  data.wrong.forEach(qId => {
+    const q = getQuestionById(qId);
+    if (!q) return;
+    h += '<div class="wrong-item" data-qid="' + qId + '">' +
+         '<div class="wrong-q">[' + qId + '] ' + q.question + '</div>' +
+         '<div class="wrong-a">正确答案: ' + q.answer + ' · ' + q[keyMap(q.answer)] + '</div></div>';
+  });
+  h += '<div style="text-align:center;margin-top:15px">' +
+       '<button class="btn btn-outline" id="clear-wrong-btn" style="color:#e74c3c;border-color:#e74c3c">🗑️ 清空错题本</button>' +
+       '<button class="btn btn-primary" id="retry-wrong-btn" style="margin-left:10px">🔄 重做错题</button></div></div>';
+  area.innerHTML = h;
+
+  document.getElementById("clear-wrong-btn").addEventListener("click", clearWrong);
+  document.getElementById("retry-wrong-btn").addEventListener("click", retryWrong);
+
+  area.querySelectorAll(".wrong-item").forEach(item => {
+    item.addEventListener("click", () => reviewWrong(item.dataset.qid));
+  });
+}
+
+function clearWrong() {
+  if (confirm("确定清空所有错题记录？")) {
+    const d = getData(); d.wrong = []; saveData(); renderWrong();
+    showToast("错题本已清空");
+  }
+}
+
+function retryWrong() {
+  const data = getData();
+  if (!data.wrong.length) return;
+  currentMode = "practice";
+  switchPage("practice");
+  sessionQuestions = data.wrong.map(id => getQuestionById(id)).filter(Boolean);
+  currentIndex = 0; sessionAnswers = {}; sessionScore = { correct: 0, wrong: 0 }; sessionStartTime = Date.now();
+  showToast("🔄 开始重做 " + sessionQuestions.length + " 道错题");
+  renderQuestion();
+}
+
+function reviewWrong(qId) {
+  const q = getQuestionById(qId);
+  if (!q) return;
+  const area = document.getElementById("wrong-area");
+  let oh = "";
+  ["A", "B", "C", "D"].forEach((lbl, i) => {
+    const key = ["optionA", "optionB", "optionC", "optionD"][i];
+    const cls = lbl === q.answer ? "correct" : "";
+    oh += '<div class="option ' + cls + ' disabled"><span class="option-label">' + lbl + '</span><span>' + q[key] + '</span></div>';
+  });
+
+  area.innerHTML =
+    '<div class="card">' +
+    '<div class="question-header"><span class="question-number">错题回顾 · #' + qId + '</span><span class="category-tag">' + getCategory(q) + '</span></div>' +
+    '<div class="question-text">' + q.question + '</div>' +
+    '<div class="options">' + oh + '</div>' +
+    '<div class="explanation show">💡 正确答案: ' + q.answer + '. ' + q[keyMap(q.answer)] + (q.explanation ? '<br>' + q.explanation : '') + '</div>' +
+    '<div class="btn-row"><button class="btn btn-outline" id="back-wrong-btn">⬅ 返回错题本</button>' +
+    '<button class="btn btn-success" id="remove-wrong-btn" style="margin-left:auto">✅ 已掌握，移出错题</button></div></div>';
+
+  document.getElementById("back-wrong-btn").addEventListener("click", renderWrong);
+  document.getElementById("remove-wrong-btn").addEventListener("click", () => {
+    removeWrong(qId);
+    showToast("已从错题本移除");
+    renderWrong();
+  });
+}
+
+// ======== STATS ========
+function renderStats() {
+  const data = getData();
+  const area = document.getElementById("stats-area");
+  const td = data.history.reduce((s, r) => s + r.total, 0);
+  const tc = data.history.reduce((s, r) => s + r.correct, 0);
+  const acc = td > 0 ? Math.round(tc / td * 100) : 0;
+
+  // Category distribution
+  const qcc = {};
+  CATEGORIES.forEach(c => qcc[c] = 0);
+  ALL_QUESTIONS.forEach(q => qcc[getCategory(q)]++);
+
+  let h =
+    '<div class="stats-grid">' +
+    '<div class="stat-card"><div class="stat-value blue">' + td + '</div><div class="stat-label">累计做题</div></div>' +
+    '<div class="stat-card"><div class="stat-value green">' + tc + '</div><div class="stat-label">答对题数</div></div>' +
+    '<div class="stat-card"><div class="stat-value orange">' + acc + '%</div><div class="stat-label">总正确率</div></div>' +
+    '<div class="stat-card"><div class="stat-value red">' + data.wrong.length + '</div><div class="stat-label">待复习错题</div></div>' +
+    '</div>';
+
+  // Category chart
+  h += '<div class="chart-container"><div class="chart-title">📚 题库分类分布</div>';
+  CATEGORIES.forEach((c, i) => {
+    const pct = (qcc[c] / ALL_QUESTIONS.length * 100).toFixed(1);
+    h += '<div class="chart-bar"><span class="chart-label">' + c + '</span>' +
+         '<div class="chart-track"><div class="chart-fill" style="width:' + pct + '%;background:' + CAT_COLORS[i] + '">' + qcc[c] + '题</div></div></div>';
+  });
+  h += '</div>';
+
+  // History chart
+  h += '<div class="chart-container"><div class="chart-title">📈 做题记录（最近20次）</div>';
+  if (!data.history.length) {
+    h += '<p style="color:#aaa;text-align:center;padding:20px">暂无记录</p>';
+  } else {
+    data.history.slice(-20).reverse().forEach(r => {
+      const pct = r.total > 0 ? Math.round(r.correct / r.total * 100) : 0;
+      const bg = pct >= 80 ? "#27ae60" : pct >= 60 ? "#f39c12" : "#e74c3c";
+      h += '<div class="chart-bar"><span class="chart-label">' + r.date + '</span>' +
+           '<div class="chart-track"><div class="chart-fill" style="width:' + pct + '%;background:' + bg + '">' +
+           r.type + ' ' + r.correct + '/' + r.total + ' (' + pct + '%)</div></div></div>';
+    });
+  }
+  h += '</div>';
+
+  // Clear data button
+  h += '<div style="text-align:center;margin-top:20px">' +
+       '<button class="btn btn-outline" id="clear-all-btn" style="color:#e74c3c;border-color:#e74c3c">🗑️ 清除所有学习数据</button></div>';
+
+  area.innerHTML = h;
+  document.getElementById("clear-all-btn").addEventListener("click", clearAll);
+}
+
+function clearAll() {
+  if (confirm("确定清除所有学习记录和错题？此操作不可恢复！")) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderStats();
+    renderHome();
+    showToast("所有数据已清除");
+  }
+}
+
+// ======== KEYBOARD SHORTCUTS ========
+document.addEventListener("keydown", (e) => {
+  if (["practice", "random", "exam"].includes(currentMode) && currentIndex < sessionQuestions.length) {
+    const q = sessionQuestions[currentIndex];
+    if (sessionAnswers[q.id] === undefined) {
+      if (e.key === "1" || e.key === "a" || e.key === "A") selectOpt(q.id, "A");
+      if (e.key === "2" || e.key === "b" || e.key === "B") selectOpt(q.id, "B");
+      if (e.key === "3" || e.key === "c" || e.key === "C") selectOpt(q.id, "C");
+      if (e.key === "4" || e.key === "d" || e.key === "D") selectOpt(q.id, "D");
+    }
+    if (e.key === "ArrowLeft") prevQ();
+    if (e.key === "ArrowRight" && sessionAnswers[q.id] !== undefined) nextQ();
+  }
+});
+
+// ======== INIT ========
+renderHome();
+</script>
+</body>
+</html>
