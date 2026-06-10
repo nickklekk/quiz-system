@@ -167,7 +167,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 
   <!-- EXAM -->
   <div id="page-exam" class="page">
-    <div id="exam-timer" class="hidden" style="background:#e74c3c;color:white;text-align:center;padding:12px;border-radius:8px;margin-bottom:15px;font-size:18px;font-weight:600"></div>
     <div class="card" id="exam-setup">
       <h3 style="margin-bottom:15px">📋 模拟考试设置</h3>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
@@ -2141,6 +2140,7 @@ function renderQuestion() {
   const ci = CATEGORIES.indexOf(cat);
   const progress = (currentIndex / sessionQuestions.length * 100).toFixed(1);
   const answered = sessionAnswers[q.id] !== undefined;
+  const area = currentMode === "practice" ? "practice-area" : currentMode === "random" ? "random-area" : "exam-area";
 
   let oh = "";
   ["A", "B", "C", "D"].forEach((lbl, i) => {
@@ -2156,6 +2156,11 @@ function renderQuestion() {
           '<span class="option-label">' + lbl + '</span><span>' + val + '</span></div>';
   });
 
+  let timerHtml = "";
+  if (currentMode === "exam") {
+    timerHtml = '<span style="color:#e74c3c;font-weight:600">⏱ ' + formatTime(examRemain) + '</span>';
+  }
+
   let expHtml = "";
   if (answered) {
     const ansKey = keyMap(q.answer);
@@ -2163,17 +2168,13 @@ function renderQuestion() {
               (q.explanation ? '<br>' + q.explanation : '') + '</div>';
   }
 
-  let areaId;
-  if (currentMode === "practice") areaId = "practice-area";
-  else if (currentMode === "random") areaId = "random-area";
-  else areaId = "exam-area";
-
-  document.getElementById(areaId).innerHTML =
+  document.getElementById(area).innerHTML =
     '<div class="card">' +
     '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
     '<div class="question-header">' +
     '<span class="question-number">第 ' + (currentIndex + 1) + ' / ' + sessionQuestions.length + ' 题</span>' +
     '<span class="category-tag" style="background:' + CAT_COLORS[ci] + '20;color:' + CAT_COLORS[ci] + '">' + cat + '</span>' +
+    timerHtml +
     '</div>' +
     '<div class="question-text">' + q.question + '</div>' +
     '<div class="options">' + oh + '</div>' +
@@ -2183,6 +2184,15 @@ function renderQuestion() {
     '<button class="btn ' + (answered && currentIndex < sessionQuestions.length - 1 ? 'btn-primary' : 'btn-success') + '" id="next-btn"' + (!answered ? ' disabled' : '') + '>' +
     (currentIndex === sessionQuestions.length - 1 ? '✅ 提交' : '下一题 ➡') +
     '</button></div></div>';
+
+  // Bind option clicks
+  document.getElementById(area).querySelectorAll(".option:not(.disabled)").forEach(o => {
+    o.addEventListener("click", () => selectOpt(o.dataset.qid, o.dataset.lbl));
+  });
+
+  // Bind nav buttons
+  document.getElementById("prev-btn").addEventListener("click", prevQ);
+  document.getElementById("next-btn").addEventListener("click", nextQ);
 }
 
 // ======== ANSWER LOGIC ========
@@ -2198,7 +2208,7 @@ function selectOpt(qId, lbl) {
     addWrong(qId);
     showToast("❌ 回答错误，正确答案是 " + q.answer);
   }
-  renderQuestion(); // Re-render to show result + rebind events
+  renderQuestion();
 }
 
 function prevQ() { if (currentIndex > 0) { currentIndex--; renderQuestion(); } }
@@ -2228,32 +2238,14 @@ function startExam() {
   const perQ = parseInt(document.getElementById("exam-time").value);
   const s = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
   sessionQuestions = s.slice(0, Math.min(cnt, ALL_QUESTIONS.length));
-  currentIndex = 0;
-  sessionAnswers = {};
-  sessionScore = { correct: 0, wrong: 0 };
-  sessionStartTime = Date.now();
+  currentIndex = 0; sessionAnswers = {}; sessionScore = { correct: 0, wrong: 0 }; sessionStartTime = Date.now();
   examRemain = cnt * perQ;
-
-  // Show timer bar
-  const timerEl = document.getElementById("exam-timer");
-  timerEl.classList.remove("hidden");
-  timerEl.textContent = "⏱ " + formatTime(examRemain);
-
-  // Start independent timer (only updates timer display, does NOT re-render)
   if (examTimer) clearInterval(examTimer);
   examTimer = setInterval(() => {
     examRemain--;
-    if (examRemain <= 0) {
-      clearInterval(examTimer);
-      examTimer = null;
-      timerEl.classList.add("hidden");
-      showToast("⏰ 时间到！自动提交");
-      showResult();
-      return;
-    }
-    timerEl.textContent = "⏱ " + formatTime(examRemain);
+    if (examRemain <= 0) { clearInterval(examTimer); examTimer = null; showToast("⏰ 时间到！自动提交"); showResult(); return; }
+    if (currentIndex < sessionQuestions.length) renderQuestion();
   }, 1000);
-
   showToast("📋 考试开始！共 " + sessionQuestions.length + " 题");
   renderQuestion();
 }
@@ -2261,7 +2253,6 @@ function startExam() {
 // ======== RESULT ========
 function showResult() {
   if (examTimer) { clearInterval(examTimer); examTimer = null; }
-  document.getElementById("exam-timer").classList.add("hidden");
   const elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
   const total = sessionQuestions.length;
   const correct = sessionScore.correct;
@@ -2447,44 +2438,18 @@ function clearAll() {
   }
 }
 
-// ======== EVENT DELEGATION ========
-// Centralized click handling — works regardless of DOM re-renders
-document.addEventListener("click", function(e) {
-  // Option clicks
-  const opt = e.target.closest(".option:not(.disabled)");
-  if (opt) {
-    selectOpt(opt.dataset.qid, opt.dataset.lbl);
-    return;
-  }
-  // Prev button
-  if (e.target.id === "prev-btn" || e.target.closest("#prev-btn")) {
-    if (currentIndex > 0) { currentIndex--; renderQuestion(); }
-    return;
-  }
-  // Next button
-  if (e.target.id === "next-btn" || e.target.closest("#next-btn")) {
-    if (sessionAnswers[sessionQuestions[currentIndex]?.id] === undefined) return;
-    if (currentIndex < sessionQuestions.length - 1) { currentIndex++; renderQuestion(); }
-    else showResult();
-    return;
-  }
-});
-
 // ======== KEYBOARD SHORTCUTS ========
 document.addEventListener("keydown", (e) => {
-  if (!["practice", "random", "exam"].includes(currentMode) || currentIndex >= sessionQuestions.length) return;
-  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
-  const q = sessionQuestions[currentIndex];
-  if (sessionAnswers[q.id] === undefined) {
-    if (e.key === "1" || e.key === "a" || e.key === "A") selectOpt(q.id, "A");
-    if (e.key === "2" || e.key === "b" || e.key === "B") selectOpt(q.id, "B");
-    if (e.key === "3" || e.key === "c" || e.key === "C") selectOpt(q.id, "C");
-    if (e.key === "4" || e.key === "d" || e.key === "D") selectOpt(q.id, "D");
-  }
-  if (e.key === "ArrowLeft" && currentIndex > 0) { currentIndex--; renderQuestion(); }
-  if (e.key === "ArrowRight" && sessionAnswers[q.id] !== undefined) {
-    if (currentIndex < sessionQuestions.length - 1) { currentIndex++; renderQuestion(); }
-    else showResult();
+  if (["practice", "random", "exam"].includes(currentMode) && currentIndex < sessionQuestions.length) {
+    const q = sessionQuestions[currentIndex];
+    if (sessionAnswers[q.id] === undefined) {
+      if (e.key === "1" || e.key === "a" || e.key === "A") selectOpt(q.id, "A");
+      if (e.key === "2" || e.key === "b" || e.key === "B") selectOpt(q.id, "B");
+      if (e.key === "3" || e.key === "c" || e.key === "C") selectOpt(q.id, "C");
+      if (e.key === "4" || e.key === "d" || e.key === "D") selectOpt(q.id, "D");
+    }
+    if (e.key === "ArrowLeft") prevQ();
+    if (e.key === "ArrowRight" && sessionAnswers[q.id] !== undefined) nextQ();
   }
 });
 
