@@ -8,7 +8,7 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
-.header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+.header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: relative; }
 .header h1 { font-size: 24px; font-weight: 600; }
 .header p { font-size: 14px; opacity: 0.85; margin-top: 5px; }
 .container { max-width: 800px; margin: 0 auto; padding: 20px; }
@@ -83,6 +83,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .empty-state p { font-size: 15px; }
 .hidden { display: none !important; }
 
+/* Login page */
+.login-page { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 100px); padding: 20px; }
+.login-card { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 420px; width: 100%; text-align: center; }
+.login-card h2 { font-size: 22px; color: #1a5276; margin-bottom: 8px; }
+.login-card .login-sub { font-size: 14px; color: #888; margin-bottom: 25px; }
+.login-input { width: 100%; padding: 14px 18px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; margin-bottom: 12px; transition: border-color 0.3s; outline: none; }
+.login-input:focus { border-color: #2980b9; box-shadow: 0 0 0 3px rgba(41,128,185,0.15); }
+.login-input::placeholder { color: #bbb; }
+.login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a5276, #2980b9); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(41,128,185,0.3); }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.login-error { color: #e74c3c; font-size: 13px; margin-top: 10px; display: none; }
+.login-recent { margin-top: 20px; }
+.login-recent-title { font-size: 13px; color: #888; margin-bottom: 8px; }
+.login-recent-list { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.login-recent-item { padding: 8px 16px; background: #eaf2f8; color: #2980b9; border-radius: 20px; font-size: 14px; cursor: pointer; transition: all 0.2s; border: none; }
+.login-recent-item:hover { background: #2980b9; color: white; transform: translateY(-1px); }
+.login-icon { font-size: 48px; margin-bottom: 15px; }
+
+/* Header user info */
+.header-user { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 14px; display: flex; align-items: center; gap: 12px; }
+.header-user .user-name { color: white; font-weight: 600; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 15px; }
+.header-user .logout-btn { color: rgba(255,255,255,0.8); cursor: pointer; font-size: 13px; transition: color 0.2s; border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 15px; background: none; }
+.header-user .logout-btn:hover { color: white; border-color: white; }
+
 /* Toast notification */
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; }
@@ -104,12 +129,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 
 <div id="toast" class="toast"></div>
 
-<div class="header">
+<div class="header" id="header-bar">
   <h1>🧪 唯能润滑脂知识刷题系统</h1>
   <p>东莞市唯能新材料科技有限公司 · 内部培训</p>
+  <div class="header-user hidden" id="header-user">
+    <span class="user-name" id="display-username"></span>
+    <button class="logout-btn" id="logout-btn">退出</button>
+  </div>
 </div>
 
 <div class="container">
+  <!-- LOGIN PAGE -->
+  <div id="page-login" class="login-page">
+    <div class="login-card">
+      <div class="login-icon">👤</div>
+      <h2>员工登录</h2>
+      <p class="login-sub">请输入您的姓名，开始刷题学习</p>
+      <input type="text" class="login-input" id="login-name" placeholder="请输入姓名" maxlength="20" autocomplete="off">
+      <input type="text" class="login-input" id="login-dept" placeholder="部门（可选）" maxlength="30" autocomplete="off">
+      <button class="login-btn" id="login-btn">登录</button>
+      <div class="login-error" id="login-error">请输入姓名</div>
+      <div class="login-recent" id="login-recent"></div>
+    </div>
+  </div>
+
+  <!-- MAIN APP (hidden until login) -->
+  <div id="main-app" class="hidden">
   <div class="tabs">
     <button class="tab active" data-page="home">🏠 首页</button>
     <button class="tab" data-page="practice">📝 顺序刷题</button>
@@ -167,6 +212,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 
   <!-- EXAM -->
   <div id="page-exam" class="page">
+    <div id="exam-timer" class="hidden" style="background:#e74c3c;color:white;text-align:center;padding:12px;border-radius:8px;margin-bottom:15px;font-size:18px;font-weight:600"></div>
     <div class="card" id="exam-setup">
       <h3 style="margin-bottom:15px">📋 模拟考试设置</h3>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
@@ -202,6 +248,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
   <div id="page-stats" class="page">
     <div id="stats-area"></div>
   </div>
+  </div><!-- end main-app -->
 </div>
 
 <script>
@@ -214,7 +261,8 @@ const ALL_QUESTIONS = [
     "optionB": "5S",
     "optionC": "10S",
     "optionD": "15S",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 5S。📖 出处：《常用检测指标和意义》 → 第1章 锥入度测试（GB-T269/ASTM D217）"
   },
   {
     "id": "1002",
@@ -223,7 +271,8 @@ const ALL_QUESTIONS = [
     "optionB": "0.1mm",
     "optionC": "1mm",
     "optionD": "10mm",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 0.1mm。📖 出处：《常用检测指标和意义》 → 第1章 锥入度测试（GB-T269/ASTM D217）"
   },
   {
     "id": "1003",
@@ -232,7 +281,8 @@ const ALL_QUESTIONS = [
     "optionB": "25℃",
     "optionC": "30℃",
     "optionD": "35℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 25℃。📖 出处：《常用检测指标和意义》 → 第1章 锥入度测试（GB-T269/ASTM D217）"
   },
   {
     "id": "1004",
@@ -241,7 +291,8 @@ const ALL_QUESTIONS = [
     "optionB": "额外加重力",
     "optionC": "弹簧力",
     "optionD": "气压",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 标准锥自身重力。📖 出处：《常用检测指标和意义》 → 第1章 锥入度测试（GB-T269/ASTM D217）"
   },
   {
     "id": "1005",
@@ -250,7 +301,8 @@ const ALL_QUESTIONS = [
     "optionB": "60次",
     "optionC": "120次",
     "optionD": "240次",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 60次。📖 出处：《常用检测指标和意义》 → 第2章 工作锥入度与延长工作锥入度"
   },
   {
     "id": "1006",
@@ -259,7 +311,8 @@ const ALL_QUESTIONS = [
     "optionB": "60次",
     "optionC": "120次",
     "optionD": "10000次",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 60次。📖 出处：《常用检测指标和意义》 → 第2章 工作锥入度与延长工作锥入度"
   },
   {
     "id": "1007",
@@ -268,7 +321,8 @@ const ALL_QUESTIONS = [
     "optionB": "340-380",
     "optionC": "265-295",
     "optionD": "175-205",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 445-475。📖 出处：《常用检测指标和意义》 → 第3章 锥入度等级和范围（NLGI稠度等级）"
   },
   {
     "id": "1008",
@@ -277,7 +331,8 @@ const ALL_QUESTIONS = [
     "optionB": "8个",
     "optionC": "9个",
     "optionD": "10个",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 9个。📖 出处：《常用检测指标和意义》 → 第3章 锥入度等级和范围（NLGI稠度等级）"
   },
   {
     "id": "1009",
@@ -286,7 +341,8 @@ const ALL_QUESTIONS = [
     "optionB": "半流体",
     "optionC": "类似肥皂",
     "optionD": "液体",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 类似肥皂。📖 出处：《常用检测指标和意义》 → 第3章 锥入度等级和范围（NLGI稠度等级）"
   },
   {
     "id": "1010",
@@ -295,7 +351,8 @@ const ALL_QUESTIONS = [
     "optionB": "半流体",
     "optionC": "软膏",
     "optionD": "液体",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 半流体。📖 出处：《常用检测指标和意义》 → 第3章 锥入度等级和范围（NLGI稠度等级）"
   },
   {
     "id": "1011",
@@ -304,7 +361,8 @@ const ALL_QUESTIONS = [
     "optionB": "润滑脂从脂杯中滴出第一滴液体时的温度",
     "optionC": "润滑脂开始分解的温度",
     "optionD": "润滑脂开始变软的温度",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 润滑脂从脂杯中滴出第一滴液体时的温度。📖 出处：《常用检测指标和意义》 → 第4章 滴点（GB-T3498/ASTM D2265）"
   },
   {
     "id": "1012",
@@ -313,7 +371,8 @@ const ALL_QUESTIONS = [
     "optionB": "最高使用温度",
     "optionC": "抗氧化性能",
     "optionD": "抗水性",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 最高使用温度。📖 出处：《常用检测指标和意义》 → 第4章 滴点（GB-T3498/ASTM D2265）"
   },
   {
     "id": "1013",
@@ -322,7 +381,8 @@ const ALL_QUESTIONS = [
     "optionB": "10-20℃",
     "optionC": "20-30℃",
     "optionD": "30-40℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 20-30℃。📖 出处：《常用检测指标和意义》 → 第4章 滴点（GB-T3498/ASTM D2265）"
   },
   {
     "id": "1014",
@@ -331,7 +391,8 @@ const ALL_QUESTIONS = [
     "optionB": "24h",
     "optionC": "48h",
     "optionD": "72h",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 24h。📖 出处：《常用检测指标和意义》 → 第5章 蒸发损失（GB-T7325/ASTM D972）"
   },
   {
     "id": "1015",
@@ -340,7 +401,8 @@ const ALL_QUESTIONS = [
     "optionB": "空气通过试样表面",
     "optionC": "空气注入试样内部",
     "optionD": "无需空气",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 空气通过试样表面。📖 出处：《常用检测指标和意义》 → 第5章 蒸发损失（GB-T7325/ASTM D972）"
   },
   {
     "id": "1016",
@@ -349,7 +411,8 @@ const ALL_QUESTIONS = [
     "optionB": "干枯，寿命降低",
     "optionC": "颜色变深",
     "optionD": "粘度增大",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 干枯，寿命降低。📖 出处：《常用检测指标和意义》 → 第5章 蒸发损失（GB-T7325/ASTM D972）"
   },
   {
     "id": "1017",
@@ -358,7 +421,8 @@ const ALL_QUESTIONS = [
     "optionB": "10g",
     "optionC": "15g",
     "optionD": "20g",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 10g。📖 出处：《常用检测指标和意义》 → 第6章 钢网分油（SHT0324/ASTM D6184）"
   },
   {
     "id": "1018",
@@ -367,7 +431,8 @@ const ALL_QUESTIONS = [
     "optionB": "100℃×24h",
     "optionC": "120℃×24h",
     "optionD": "100℃×12h",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 100℃×24h。📖 出处：《常用检测指标和意义》 → 第6章 钢网分油（SHT0324/ASTM D6184）"
   },
   {
     "id": "1019",
@@ -376,7 +441,8 @@ const ALL_QUESTIONS = [
     "optionB": "60目",
     "optionC": "80目",
     "optionD": "100目",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 60目。📖 出处：《常用检测指标和意义》 → 第6章 钢网分油（SHT0324/ASTM D6184）"
   },
   {
     "id": "1020",
@@ -385,7 +451,8 @@ const ALL_QUESTIONS = [
     "optionB": "胶体安定性",
     "optionC": "机械安定性",
     "optionD": "热安定性",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 胶体安定性。📖 出处：《常用检测指标和意义》 → 第6章 钢网分油（SHT0324/ASTM D6184）"
   },
   {
     "id": "1021",
@@ -394,7 +461,8 @@ const ALL_QUESTIONS = [
     "optionB": "45度",
     "optionC": "60度",
     "optionD": "90度",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 60度。📖 出处：《常用检测指标和意义》 → 第6章 钢网分油（SHT0324/ASTM D6184）"
   },
   {
     "id": "1022",
@@ -403,7 +471,8 @@ const ALL_QUESTIONS = [
     "optionB": "0.3mm",
     "optionC": "0.5mm",
     "optionD": "1.0mm",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 0.5mm。📖 出处：《常用检测指标和意义》 → 第7章 扩散性测试（VN/T 044-2020）"
   },
   {
     "id": "1023",
@@ -412,7 +481,8 @@ const ALL_QUESTIONS = [
     "optionB": "VN/T 044-2020",
     "optionC": "VN/T 0324",
     "optionD": "VN/T 0338",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. VN/T 044-2020。📖 出处：《常用检测指标和意义》 → 第7章 扩散性测试（VN/T 044-2020）"
   },
   {
     "id": "1024",
@@ -421,7 +491,8 @@ const ALL_QUESTIONS = [
     "optionB": "80℃/12h",
     "optionC": "100℃/24h",
     "optionD": "120℃/24h",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 100℃/24h。📖 出处：《常用检测指标和意义》 → 第8章 铜片腐蚀（GB T 7326/ASTM D4048）"
   },
   {
     "id": "1025",
@@ -430,7 +501,8 @@ const ALL_QUESTIONS = [
     "optionB": "对比标准板",
     "optionC": "测量重量变化",
     "optionD": "测量厚度变化",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 对比标准板。📖 出处：《常用检测指标和意义》 → 第8章 铜片腐蚀（GB T 7326/ASTM D4048）"
   },
   {
     "id": "1026",
@@ -439,7 +511,8 @@ const ALL_QUESTIONS = [
     "optionB": "绿色或黑色",
     "optionC": "黄色或白色",
     "optionD": "紫色或蓝色",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 绿色或黑色。📖 出处：《常用检测指标和意义》 → 第8章 铜片腐蚀（GB T 7326/ASTM D4048）"
   },
   {
     "id": "1027",
@@ -448,7 +521,8 @@ const ALL_QUESTIONS = [
     "optionB": "烧结负荷",
     "optionC": "磨斑负荷",
     "optionD": "磨损负荷",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 最大无卡咬负荷。📖 出处：《常用检测指标和意义》 → 第9-10章 四球测试（GB T3142/GB/T 0202/ASTM D2783/D2596）"
   },
   {
     "id": "1028",
@@ -457,7 +531,8 @@ const ALL_QUESTIONS = [
     "optionB": "烧结负荷",
     "optionC": "磨斑负荷",
     "optionD": "磨损负荷",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 烧结负荷。📖 出处：《常用检测指标和意义》 → 第9-10章 四球测试（GB T3142/GB/T 0202/ASTM D2783/D2596）"
   },
   {
     "id": "1029",
@@ -466,7 +541,8 @@ const ALL_QUESTIONS = [
     "optionB": "294N",
     "optionC": "392N",
     "optionD": "490N",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 392N。📖 出处：《常用检测指标和意义》 → 第9-10章 四球测试（GB T3142/GB/T 0202/ASTM D2783/D2596）"
   },
   {
     "id": "1030",
@@ -475,7 +551,8 @@ const ALL_QUESTIONS = [
     "optionB": "800r/min",
     "optionC": "1000r/min",
     "optionD": "1200r/min",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 1200r/min。📖 出处：《常用检测指标和意义》 → 第9-10章 四球测试（GB T3142/GB/T 0202/ASTM D2783/D2596）"
   },
   {
     "id": "1031",
@@ -484,7 +561,8 @@ const ALL_QUESTIONS = [
     "optionB": "2个",
     "optionC": "3个",
     "optionD": "4个",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 3个。📖 出处：《常用检测指标和意义》 → 第9-10章 四球测试（GB T3142/GB/T 0202/ASTM D2783/D2596）"
   },
   {
     "id": "1032",
@@ -493,7 +571,8 @@ const ALL_QUESTIONS = [
     "optionB": "2个",
     "optionC": "3个",
     "optionD": "4个",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 3个。📖 出处：《常用检测指标和意义》 → 第9-10章 四球测试（GB T3142/GB/T 0202/ASTM D2783/D2596）"
   },
   {
     "id": "1033",
@@ -502,7 +581,8 @@ const ALL_QUESTIONS = [
     "optionB": "非牛顿流体",
     "optionC": "理想流体",
     "optionD": "塑性流体",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 非牛顿流体。📖 出处：《常用检测指标和意义》 → 第12-16章 流变测试与表征动态粘度"
   },
   {
     "id": "1034",
@@ -511,7 +591,8 @@ const ALL_QUESTIONS = [
     "optionB": "300s⁻¹",
     "optionC": "500s⁻¹",
     "optionD": "1000s⁻¹",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 500s⁻¹。📖 出处：《常用检测指标和意义》 → 第12-16章 流变测试与表征动态粘度"
   },
   {
     "id": "1035",
@@ -520,7 +601,8 @@ const ALL_QUESTIONS = [
     "optionB": "4000-8000",
     "optionC": "8000-20000",
     "optionD": "≥20000",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 4000-8000。📖 出处：《常用检测指标和意义》 → 第12-16章 流变测试与表征动态粘度"
   },
   {
     "id": "1036",
@@ -529,7 +611,8 @@ const ALL_QUESTIONS = [
     "optionB": "剪切时稠度上升，停止后下降",
     "optionC": "温度升高粘度降低",
     "optionD": "温度降低粘度升高",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 剪切时稠度下降，停止后上升。📖 出处：《常用检测指标和意义》 → 第12-16章 流变测试与表征动态粘度"
   },
   {
     "id": "1037",
@@ -538,7 +621,8 @@ const ALL_QUESTIONS = [
     "optionB": "Haake流变仪",
     "optionC": "布氏粘度计",
     "optionD": "毛细管粘度计",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. Haake流变仪。📖 出处：《常用检测指标和意义》 → 第12-16章 流变测试与表征动态粘度"
   },
   {
     "id": "1038",
@@ -547,7 +631,8 @@ const ALL_QUESTIONS = [
     "optionB": "cP",
     "optionC": "Pa·s",
     "optionD": "mPa·s",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. cSt(mm²/s)。📖 出处：《常用检测指标和意义》 → 第17章 基础油运动粘度（GB T 265/ASTM T9445）"
   },
   {
     "id": "1039",
@@ -556,7 +641,8 @@ const ALL_QUESTIONS = [
     "optionB": "500cP",
     "optionC": "1000cP",
     "optionD": "10000cP",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 1000cP。📖 出处：《常用检测指标和意义》 → 第17章 基础油运动粘度（GB T 265/ASTM T9445）"
   },
   {
     "id": "1040",
@@ -565,7 +651,8 @@ const ALL_QUESTIONS = [
     "optionB": "低粘度",
     "optionC": "中等粘度",
     "optionD": "无所谓",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 低粘度。📖 出处：《常用检测指标和意义》 → 第17章 基础油运动粘度（GB T 265/ASTM T9445）"
   },
   {
     "id": "1041",
@@ -574,7 +661,8 @@ const ALL_QUESTIONS = [
     "optionB": "低粘度",
     "optionC": "中等粘度",
     "optionD": "无所谓",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 高粘度。📖 出处：《常用检测指标和意义》 → 第17章 基础油运动粘度（GB T 265/ASTM T9445）"
   },
   {
     "id": "1042",
@@ -583,7 +671,8 @@ const ALL_QUESTIONS = [
     "optionB": "304钢/ABS板",
     "optionC": "304钢/POM板",
     "optionD": "304钢/PA板",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. Φ10mm POM/钢球。📖 出处：《常用检测指标和意义》 → 第18章 往复摩擦测试（VN/T 017）"
   },
   {
     "id": "1043",
@@ -592,7 +681,8 @@ const ALL_QUESTIONS = [
     "optionB": "10℃",
     "optionC": "25℃",
     "optionD": "40℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 25℃。📖 出处：《常用检测指标和意义》 → 第18章 往复摩擦测试（VN/T 017）"
   },
   {
     "id": "1044",
@@ -601,7 +691,8 @@ const ALL_QUESTIONS = [
     "optionB": "70℃/168h",
     "optionC": "100℃/24h",
     "optionD": "100℃/168h",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 70℃/168h。📖 出处：《常用检测指标和意义》 → 第19章 橡胶材料相容性测试（SH T0691）"
   },
   {
     "id": "1045",
@@ -610,7 +701,8 @@ const ALL_QUESTIONS = [
     "optionB": "重量变化率",
     "optionC": "尺寸变化率",
     "optionD": "颜色变化率",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 颜色变化率。📖 出处：《常用检测指标和意义》 → 第19章 橡胶材料相容性测试（SH T0691）"
   },
   {
     "id": "1046",
@@ -619,7 +711,8 @@ const ALL_QUESTIONS = [
     "optionB": "提取增塑剂",
     "optionC": "改变橡胶结构",
     "optionD": "软化橡胶",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 改变橡胶结构。📖 出处：《常用检测指标和意义》 → 第19章 橡胶材料相容性测试（SH T0691）"
   },
   {
     "id": "1047",
@@ -628,7 +721,8 @@ const ALL_QUESTIONS = [
     "optionB": "0.8MPa",
     "optionC": "1.0MPa",
     "optionD": "1.5MPa",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 0.8MPa。📖 出处：《常用检测指标和意义》 → 第21章 氧化安定性测试（SHT 0325/ASTM D942）"
   },
   {
     "id": "1048",
@@ -637,7 +731,8 @@ const ALL_QUESTIONS = [
     "optionB": "48h",
     "optionC": "100h",
     "optionD": "168h",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 100h。📖 出处：《常用检测指标和意义》 → 第21章 氧化安定性测试（SHT 0325/ASTM D942）"
   },
   {
     "id": "1049",
@@ -646,7 +741,8 @@ const ALL_QUESTIONS = [
     "optionB": "D204型",
     "optionC": "D206型",
     "optionD": "D208型",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. D204型。📖 出处：《常用检测指标和意义》 → 第22章 低温扭矩测试（SH T 0338/ASTM D1478）"
   },
   {
     "id": "1050",
@@ -655,7 +751,8 @@ const ALL_QUESTIONS = [
     "optionB": "10min后的转矩",
     "optionC": "30min后的转矩",
     "optionD": "60min后的转矩平均值",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 60min后的转矩平均值。📖 出处：《常用检测指标和意义》 → 第22章 低温扭矩测试（SH T 0338/ASTM D1478）"
   },
   {
     "id": "1051",
@@ -664,7 +761,8 @@ const ALL_QUESTIONS = [
     "optionB": "一般",
     "optionC": "好",
     "optionD": "极好",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 好。📖 出处：《润滑基础知识培训》 → 第1章 润滑油和润滑脂的差异（对比表）"
   },
   {
     "id": "1052",
@@ -673,7 +771,8 @@ const ALL_QUESTIONS = [
     "optionB": "旋转速度极限",
     "optionC": "密封容易",
     "optionD": "补充间隔长",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 旋转速度极限。📖 出处：《润滑基础知识培训》 → 第1章 润滑油和润滑脂的差异（润滑脂缺点）"
   },
   {
     "id": "1053",
@@ -682,7 +781,8 @@ const ALL_QUESTIONS = [
     "optionB": "冷却",
     "optionC": "润滑",
     "optionD": "减振",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 冷却。📖 出处：《润滑基础知识培训》 → 第1章 润滑油和润滑脂的差异（润滑脂缺点）"
   },
   {
     "id": "1054",
@@ -691,7 +791,8 @@ const ALL_QUESTIONS = [
     "optionB": "5-30%",
     "optionC": "70-90%",
     "optionD": "30-50%",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 5-30%。📖 出处：《润滑基础知识培训》 → 第2章 润滑脂的组成（基础油70-90%、增稠剂5-30%、添加剂0-10%）"
   },
   {
     "id": "1055",
@@ -700,7 +801,8 @@ const ALL_QUESTIONS = [
     "optionB": "30-50%",
     "optionC": "70-90%",
     "optionD": "90-100%",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 70-90%。📖 出处：《润滑基础知识培训》 → 第2章 润滑脂的组成（基础油70-90%、增稠剂5-30%、添加剂0-10%）"
   },
   {
     "id": "1056",
@@ -709,7 +811,8 @@ const ALL_QUESTIONS = [
     "optionB": "形成海绵/蜂窝骨架充满基础油",
     "optionC": "提高耐热性",
     "optionD": "降低凝固点",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 形成海绵/蜂窝骨架充满基础油。📖 出处：《润滑基础知识培训》 → 第2章 润滑脂的组成（基础油70-90%、增稠剂5-30%、添加剂0-10%）"
   },
   {
     "id": "1057",
@@ -718,7 +821,8 @@ const ALL_QUESTIONS = [
     "optionB": "5-30%",
     "optionC": "10-20%",
     "optionD": "30-50%",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 0-10%。📖 出处：《润滑基础知识培训》 → 第2章 润滑脂的组成（基础油70-90%、增稠剂5-30%、添加剂0-10%）"
   },
   {
     "id": "1058",
@@ -727,7 +831,8 @@ const ALL_QUESTIONS = [
     "optionB": "PAO",
     "optionC": "酯类油",
     "optionD": "硅油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 酯类油。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（六维评级表：润滑性/耐热性/低温性/对塑胶性/对橡胶性）"
   },
   {
     "id": "1059",
@@ -736,7 +841,8 @@ const ALL_QUESTIONS = [
     "optionB": "PAO",
     "optionC": "PAG",
     "optionD": "硅油",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 硅油。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（六维评级表：润滑性/耐热性/低温性/对塑胶性/对橡胶性）"
   },
   {
     "id": "1060",
@@ -745,7 +851,8 @@ const ALL_QUESTIONS = [
     "optionB": "△",
     "optionC": "○",
     "optionD": "◎",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. ◎。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（六维评级表：润滑性/耐热性/低温性/对塑胶性/对橡胶性）"
   },
   {
     "id": "1061",
@@ -754,7 +861,8 @@ const ALL_QUESTIONS = [
     "optionB": "△",
     "optionC": "○",
     "optionD": "◎",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. ◎。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（六维评级表：润滑性/耐热性/低温性/对塑胶性/对橡胶性）"
   },
   {
     "id": "1062",
@@ -763,7 +871,8 @@ const ALL_QUESTIONS = [
     "optionB": "○",
     "optionC": "△",
     "optionD": "×",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. ×。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（六维评级表：润滑性/耐热性/低温性/对塑胶性/对橡胶性）"
   },
   {
     "id": "1063",
@@ -772,7 +881,8 @@ const ALL_QUESTIONS = [
     "optionB": "PAO",
     "optionC": "酯类油",
     "optionD": "以上都是",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 以上都是。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（六维评级表：润滑性/耐热性/低温性/对塑胶性/对橡胶性）"
   },
   {
     "id": "1064",
@@ -781,7 +891,8 @@ const ALL_QUESTIONS = [
     "optionB": "-30~120℃",
     "optionC": "-50~140℃",
     "optionD": "-60~160℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. -30~120℃。📖 出处：《润滑基础知识培训》 → 第4章 常用基础油的使用温度（温度范围表）"
   },
   {
     "id": "1065",
@@ -790,7 +901,8 @@ const ALL_QUESTIONS = [
     "optionB": "-50~140℃",
     "optionC": "-60~160℃",
     "optionD": "-60~280℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. -50~140℃。📖 出处：《润滑基础知识培训》 → 第4章 常用基础油的使用温度（温度范围表）"
   },
   {
     "id": "1066",
@@ -799,7 +911,8 @@ const ALL_QUESTIONS = [
     "optionB": "硅油",
     "optionC": "PAG",
     "optionD": "PFPE",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PFPE。📖 出处：《润滑基础知识培训》 → 第4章 常用基础油的使用温度（温度范围表）"
   },
   {
     "id": "1067",
@@ -808,7 +921,8 @@ const ALL_QUESTIONS = [
     "optionB": "-50~140℃",
     "optionC": "-60~160℃",
     "optionD": "-40~160℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. -60~160℃。📖 出处：《润滑基础知识培训》 → 第4章 常用基础油的使用温度（温度范围表）"
   },
   {
     "id": "1068",
@@ -817,7 +931,8 @@ const ALL_QUESTIONS = [
     "optionB": "-60~280℃",
     "optionC": "-70~360℃",
     "optionD": "-40~160℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. -60~280℃。📖 出处：《润滑基础知识培训》 → 第4章 常用基础油的使用温度（温度范围表）"
   },
   {
     "id": "1069",
@@ -826,7 +941,8 @@ const ALL_QUESTIONS = [
     "optionB": "抗氧化优异",
     "optionC": "生物降解性",
     "optionD": "热稳定优异",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 生物降解性。📖 出处：《润滑基础知识培训》 → 第5章 聚α烯烃PAO基础油（性能特点与应用）"
   },
   {
     "id": "1070",
@@ -835,7 +951,8 @@ const ALL_QUESTIONS = [
     "optionB": "齿轮油",
     "optionC": "真空泵油",
     "optionD": "高温链条油",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 齿轮油。📖 出处：《润滑基础知识培训》 → 第5章 聚α烯烃PAO基础油（性能特点与应用）"
   },
   {
     "id": "1071",
@@ -844,7 +961,8 @@ const ALL_QUESTIONS = [
     "optionB": "低表面引力",
     "optionC": "生物降解性",
     "optionD": "低挥发",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 生物降解性。📖 出处：《润滑基础知识培训》 → 第6章 酯类基础油（性能特点：生物降解性/水解稳定）"
   },
   {
     "id": "1072",
@@ -853,7 +971,8 @@ const ALL_QUESTIONS = [
     "optionB": "高温链条油",
     "optionC": "密封油/脂",
     "optionD": "真空泵油",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 高温链条油。📖 出处：《润滑基础知识培训》 → 第6章 酯类基础油（性能特点：生物降解性/水解稳定）"
   },
   {
     "id": "1073",
@@ -862,7 +981,8 @@ const ALL_QUESTIONS = [
     "optionB": "极高粘度指数",
     "optionC": "低粘度指数",
     "optionD": "中等粘度指数",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 极高粘度指数。📖 出处：《润滑基础知识培训》 → 第7章 聚乙二醇PAG基础油（极高粘度指数/极优异抗磨）"
   },
   {
     "id": "1074",
@@ -871,7 +991,8 @@ const ALL_QUESTIONS = [
     "optionB": "生物降解性",
     "optionC": "极优异抗磨",
     "optionD": "与密封件相容性好",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 极优异抗磨。📖 出处：《润滑基础知识培训》 → 第7章 聚乙二醇PAG基础油（极高粘度指数/极优异抗磨）"
   },
   {
     "id": "1075",
@@ -880,7 +1001,8 @@ const ALL_QUESTIONS = [
     "optionB": "密封油/脂",
     "optionC": "齿轮油",
     "optionD": "高温脂",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 齿轮油。📖 出处：《润滑基础知识培训》 → 第7章 聚乙二醇PAG基础油（极高粘度指数/极优异抗磨）"
   },
   {
     "id": "1076",
@@ -889,7 +1011,8 @@ const ALL_QUESTIONS = [
     "optionB": "与密封件相容性好",
     "optionC": "生物降解性",
     "optionD": "抗燃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 与密封件相容性好。📖 出处：《润滑基础知识培训》 → 第8章 硅油（与密封件相容性好/低挥发/抗乳化）"
   },
   {
     "id": "1077",
@@ -898,7 +1021,8 @@ const ALL_QUESTIONS = [
     "optionB": "抗乳化",
     "optionC": "抗燃",
     "optionD": "稳定性好",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 抗燃。📖 出处：《润滑基础知识培训》 → 第8章 硅油（与密封件相容性好/低挥发/抗乳化）"
   },
   {
     "id": "1078",
@@ -907,7 +1031,8 @@ const ALL_QUESTIONS = [
     "optionB": "抗氧化优异",
     "optionC": "极高粘度指数",
     "optionD": "抗燃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 极高粘度指数。📖 出处：《润滑基础知识培训》 → 第9章 氟油PFPE（抗燃/耐酸碱/耐高温/耐真空）"
   },
   {
     "id": "1079",
@@ -916,7 +1041,8 @@ const ALL_QUESTIONS = [
     "optionB": "空压机油",
     "optionC": "真空泵油",
     "optionD": "食品级油/脂",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 真空泵油。📖 出处：《润滑基础知识培训》 → 第9章 氟油PFPE（抗燃/耐酸碱/耐高温/耐真空）"
   },
   {
     "id": "1080",
@@ -925,7 +1051,8 @@ const ALL_QUESTIONS = [
     "optionB": "低温性好",
     "optionC": "廉价通用",
     "optionD": "润滑性最优",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 廉价通用。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（矿物油：廉价通用/耐热低温差）"
   },
   {
     "id": "1081",
@@ -934,7 +1061,8 @@ const ALL_QUESTIONS = [
     "optionB": "酯类油",
     "optionC": "硅油",
     "optionD": "PAO",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PAO。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（PAO塑胶相容性◎/PAG橡胶相容性◎）"
   },
   {
     "id": "1082",
@@ -943,7 +1071,8 @@ const ALL_QUESTIONS = [
     "optionB": "矿物油",
     "optionC": "硅油",
     "optionD": "PAG",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PAG。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（PAO塑胶相容性◎/PAG橡胶相容性◎）"
   },
   {
     "id": "1083",
@@ -952,7 +1081,8 @@ const ALL_QUESTIONS = [
     "optionB": "△",
     "optionC": "○",
     "optionD": "◎",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ×。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（矿物油：廉价通用/耐热低温差）"
   },
   {
     "id": "1084",
@@ -961,7 +1091,8 @@ const ALL_QUESTIONS = [
     "optionB": "△",
     "optionC": "○",
     "optionD": "◎",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. △。📖 出处：《润滑基础知识培训》 → 第3章 基础油特性（矿物油：廉价通用/耐热低温差）"
   },
   {
     "id": "1085",
@@ -970,7 +1101,8 @@ const ALL_QUESTIONS = [
     "optionB": "PAO",
     "optionC": "酯类油",
     "optionD": "硅油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 酯类油。📖 出处：《润滑基础知识培训》 → 第6章 酯类基础油（性能特点：生物降解性/水解稳定）"
   },
   {
     "id": "1086",
@@ -979,7 +1111,8 @@ const ALL_QUESTIONS = [
     "optionB": "互相安全",
     "optionC": "仅单向兼容",
     "optionD": "视温度而定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 互相安全。📖 出处：《润滑基础知识培训》 → 第10章 基础油相容性（六种基础油互相兼容矩阵表）"
   },
   {
     "id": "1087",
@@ -988,7 +1121,8 @@ const ALL_QUESTIONS = [
     "optionB": "互相安全",
     "optionC": "仅单向兼容",
     "optionD": "视温度而定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 互相安全。📖 出处：《润滑基础知识培训》 → 第10章 基础油相容性（六种基础油互相兼容矩阵表）"
   },
   {
     "id": "1088",
@@ -997,7 +1131,8 @@ const ALL_QUESTIONS = [
     "optionB": "不兼容",
     "optionC": "视温度而定",
     "optionD": "仅单向兼容",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不兼容。📖 出处：《润滑基础知识培训》 → 第10章 基础油相容性（六种基础油互相兼容矩阵表）"
   },
   {
     "id": "1089",
@@ -1006,7 +1141,8 @@ const ALL_QUESTIONS = [
     "optionB": "酯类油",
     "optionC": "PAG",
     "optionD": "PFPE自身",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PFPE自身。📖 出处：《润滑基础知识培训》 → 第10章 基础油相容性（六种基础油互相兼容矩阵表）"
   },
   {
     "id": "1090",
@@ -1015,7 +1151,8 @@ const ALL_QUESTIONS = [
     "optionB": "PFPE与矿物油",
     "optionC": "矿物油与合成烃",
     "optionD": "PFPE与酯类油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 矿物油与合成烃。📖 出处：《润滑基础知识培训》 → 第10章 基础油相容性（六种基础油互相兼容矩阵表）"
   },
   {
     "id": "1091",
@@ -1024,7 +1161,8 @@ const ALL_QUESTIONS = [
     "optionB": "稠化剂骨架释放基础油",
     "optionC": "基础油蒸发",
     "optionD": "温度升高",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 稠化剂骨架释放基础油。📖 出处：《润滑基础知识培训》 → 第2章 润滑脂的组成（基础油70-90%、增稠剂5-30%、添加剂0-10%）"
   },
   {
     "id": "1092",
@@ -1033,7 +1171,8 @@ const ALL_QUESTIONS = [
     "optionB": "△",
     "optionC": "○",
     "optionD": "◎",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. ◎。📖 出处：《润滑基础知识培训》 → 第5章 聚α烯烃PAO基础油（性能特点与应用）"
   },
   {
     "id": "1093",
@@ -1042,7 +1181,8 @@ const ALL_QUESTIONS = [
     "optionB": "酯类油",
     "optionC": "硅油",
     "optionD": "PFPE",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PFPE。📖 出处：《润滑基础知识培训》 → 第9章 氟油PFPE（抗燃/耐酸碱/耐高温/耐真空）"
   },
   {
     "id": "1094",
@@ -1051,7 +1191,8 @@ const ALL_QUESTIONS = [
     "optionB": "-40℃",
     "optionC": "-50℃",
     "optionD": "-60℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. -40℃。📖 出处：《润滑基础知识培训》 → 第4章 常用基础油的使用温度（温度范围表）"
   },
   {
     "id": "1095",
@@ -1060,7 +1201,8 @@ const ALL_QUESTIONS = [
     "optionB": "酯类油",
     "optionC": "仅硅油自身",
     "optionD": "矿物油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 仅硅油自身。📖 出处：《润滑基础知识培训》 → 第10章 基础油相容性（六种基础油互相兼容矩阵表）"
   },
   {
     "id": "1096",
@@ -1069,7 +1211,8 @@ const ALL_QUESTIONS = [
     "optionB": "大",
     "optionC": "无",
     "optionD": "与润滑油相同",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 大。📖 出处：《润滑基础知识培训》 → 第1章 润滑油和润滑脂的差异（旋转阻力/速度极限）"
   },
   {
     "id": "1097",
@@ -1078,7 +1221,8 @@ const ALL_QUESTIONS = [
     "optionB": "酯类油",
     "optionC": "润滑脂",
     "optionD": "矿物油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 润滑脂。📖 出处：《润滑基础知识培训》 → 第1章 润滑油和润滑脂的差异（旋转阻力/速度极限）"
   },
   {
     "id": "1098",
@@ -1087,7 +1231,8 @@ const ALL_QUESTIONS = [
     "optionB": "航空发动机油",
     "optionC": "密封油/脂",
     "optionD": "真空泵油",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 航空发动机油。📖 出处：《润滑基础知识培训》 → 第6章 酯类基础油（性能特点：生物降解性/水解稳定）"
   },
   {
     "id": "1099",
@@ -1096,7 +1241,8 @@ const ALL_QUESTIONS = [
     "optionB": "PAO",
     "optionC": "酯类油",
     "optionD": "PFPE",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PFPE。📖 出处：《润滑基础知识培训》 → 第9章 氟油PFPE（抗燃/耐酸碱/耐高温/耐真空）"
   },
   {
     "id": "1100",
@@ -1105,7 +1251,8 @@ const ALL_QUESTIONS = [
     "optionB": "60%",
     "optionC": "80%",
     "optionD": "95%",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 80%。📖 出处：《润滑基础知识培训》 → 第2章 润滑脂的组成（基础油70-90%、增稠剂5-30%、添加剂0-10%）"
   },
   {
     "id": "1101",
@@ -1114,7 +1261,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. ●可能无法工作。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1102",
@@ -1123,7 +1271,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "完全相容",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. ↓请勿尝试。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1103",
@@ -1132,7 +1281,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "极度危险",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. ↓请勿尝试。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1104",
@@ -1141,7 +1291,8 @@ const ALL_QUESTIONS = [
     "optionB": "仅硅油",
     "optionC": "仅矿物油",
     "optionD": "所有基础油均安全",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 所有基础油均安全。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1105",
@@ -1150,7 +1301,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. ↓请勿尝试。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1106",
@@ -1159,7 +1311,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1107",
@@ -1168,7 +1321,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1108",
@@ -1177,7 +1331,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1109",
@@ -1186,7 +1341,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. ↓请勿尝试。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1110",
@@ -1195,7 +1351,8 @@ const ALL_QUESTIONS = [
     "optionB": "NBR",
     "optionC": "CR",
     "optionD": "FVMQ",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. CR。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1111",
@@ -1204,7 +1361,8 @@ const ALL_QUESTIONS = [
     "optionB": "SBR",
     "optionC": "IIR",
     "optionD": "ACM",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. NBR。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1112",
@@ -1213,7 +1371,8 @@ const ALL_QUESTIONS = [
     "optionB": "合成烃",
     "optionC": "PAG",
     "optionD": "酯油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. PAG。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1113",
@@ -1222,7 +1381,8 @@ const ALL_QUESTIONS = [
     "optionB": "CR",
     "optionC": "FKM",
     "optionD": "NBR",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. FKM。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1114",
@@ -1231,7 +1391,8 @@ const ALL_QUESTIONS = [
     "optionB": "ACM",
     "optionC": "IIR",
     "optionD": "SBR",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. ACM。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（10种橡胶×6种基础油矩阵表）"
   },
   {
     "id": "1115",
@@ -1240,7 +1401,8 @@ const ALL_QUESTIONS = [
     "optionB": "对多数塑料有侵蚀",
     "optionC": "仅对PTFE安全",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 对几乎所有塑料都安全。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1116",
@@ -1249,7 +1411,8 @@ const ALL_QUESTIONS = [
     "optionB": "对多数塑料有侵蚀",
     "optionC": "仅对PEEK安全",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 对几乎所有塑料都安全。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1117",
@@ -1258,7 +1421,8 @@ const ALL_QUESTIONS = [
     "optionB": "PEEK",
     "optionC": "PC",
     "optionD": "PA(尼龙)",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. PC。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1118",
@@ -1267,7 +1431,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓不相容",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑相容。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1119",
@@ -1276,7 +1441,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓不相容",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑相容。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1120",
@@ -1285,7 +1451,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. ●可能无法工作。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1121",
@@ -1294,7 +1461,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1122",
@@ -1303,7 +1471,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. ●可能无法工作。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1123",
@@ -1312,7 +1481,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1124",
@@ -1321,7 +1491,8 @@ const ALL_QUESTIONS = [
     "optionB": "POM",
     "optionC": "PVC",
     "optionD": "PTFE",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. PVC。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1125",
@@ -1330,7 +1501,8 @@ const ALL_QUESTIONS = [
     "optionB": "POM",
     "optionC": "PC",
     "optionD": "PFPE",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. PC。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1126",
@@ -1339,7 +1511,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1127",
@@ -1348,7 +1521,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1128",
@@ -1357,7 +1531,8 @@ const ALL_QUESTIONS = [
     "optionB": "复合铝基",
     "optionC": "聚脲",
     "optionD": "复合钠基",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 聚脲。📖 出处：《润滑基础知识培训》 → 第12章 基础油与塑胶相容性（15种塑胶×6种基础油矩阵表）"
   },
   {
     "id": "1129",
@@ -1366,7 +1541,8 @@ const ALL_QUESTIONS = [
     "optionB": "无定形硅",
     "optionC": "PTFE",
     "optionD": "铝基",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 铝基。📖 出处：《润滑基础知识培训》 → 第13章 稠化剂的类型和特性（皂基9种+非皂基4种）"
   },
   {
     "id": "1130",
@@ -1375,7 +1551,8 @@ const ALL_QUESTIONS = [
     "optionB": "10种",
     "optionC": "4种",
     "optionD": "13种",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 9种。📖 出处：《润滑基础知识培训》 → 第13章 稠化剂的类型和特性（皂基9种+非皂基4种）"
   },
   {
     "id": "1131",
@@ -1384,7 +1561,8 @@ const ALL_QUESTIONS = [
     "optionB": "9种",
     "optionC": "13种",
     "optionD": "3种",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 4种。📖 出处：《润滑基础知识培训》 → 第13章 稠化剂的类型和特性（皂基9种+非皂基4种）"
   },
   {
     "id": "1132",
@@ -1393,7 +1571,8 @@ const ALL_QUESTIONS = [
     "optionB": "膨润土",
     "optionC": "复合钙基",
     "optionD": "无定形硅",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 复合钙基。📖 出处：《润滑基础知识培训》 → 第13章 稠化剂的类型和特性（皂基9种+非皂基4种）"
   },
   {
     "id": "1133",
@@ -1402,7 +1581,8 @@ const ALL_QUESTIONS = [
     "optionB": "170-200℃",
     "optionC": "230-250℃",
     "optionD": ">250℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 170-200℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1134",
@@ -1411,7 +1591,8 @@ const ALL_QUESTIONS = [
     "optionB": "100-120℃",
     "optionC": "170-200℃",
     "optionD": "230-250℃",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 80-100℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1135",
@@ -1420,7 +1601,8 @@ const ALL_QUESTIONS = [
     "optionB": "200-240℃",
     "optionC": "230-250℃",
     "optionD": ">300℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 230-250℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1136",
@@ -1429,7 +1611,8 @@ const ALL_QUESTIONS = [
     "optionB": "100-120℃",
     "optionC": "170-200℃",
     "optionD": "200-260℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 100-120℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1137",
@@ -1438,7 +1621,8 @@ const ALL_QUESTIONS = [
     "optionB": "复合铝基",
     "optionC": "膨润土",
     "optionD": "复合锂基",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 膨润土。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1138",
@@ -1447,7 +1631,8 @@ const ALL_QUESTIONS = [
     "optionB": "230-250℃",
     "optionC": ">250℃",
     "optionD": ">300℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. >250℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1139",
@@ -1456,7 +1641,8 @@ const ALL_QUESTIONS = [
     "optionB": "200-240℃",
     "optionC": ">300℃",
     "optionD": "230-250℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. >300℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1140",
@@ -1465,7 +1651,8 @@ const ALL_QUESTIONS = [
     "optionB": "230-250℃",
     "optionC": "无滴点",
     "optionD": ">300℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 无滴点。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1141",
@@ -1474,7 +1661,8 @@ const ALL_QUESTIONS = [
     "optionB": "膨润土",
     "optionC": "无定形硅",
     "optionD": "复合钠基",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 无定形硅。📖 出处：《润滑基础知识培训》 → 第17章 稠化剂相容性（13×13稠化剂相容矩阵表）"
   },
   {
     "id": "1142",
@@ -1483,7 +1671,8 @@ const ALL_QUESTIONS = [
     "optionB": "磺酸钙基",
     "optionC": "铝基",
     "optionD": "复合锂基",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. PTFE。📖 出处：《润滑基础知识培训》 → 第17章 稠化剂相容性（13×13稠化剂相容矩阵表）"
   },
   {
     "id": "1143",
@@ -1492,7 +1681,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "部分相容",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第17章 稠化剂相容性（13×13稠化剂相容矩阵表）"
   },
   {
     "id": "1144",
@@ -1501,7 +1691,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "部分相容",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第17章 稠化剂相容性（13×13稠化剂相容矩阵表）"
   },
   {
     "id": "1145",
@@ -1510,7 +1701,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "部分相容",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第17章 稠化剂相容性（13×13稠化剂相容矩阵表）"
   },
   {
     "id": "1146",
@@ -1519,7 +1711,8 @@ const ALL_QUESTIONS = [
     "optionB": "锂基-复合钠基",
     "optionC": "聚脲-膨润土",
     "optionD": "复合锂基-无定形硅",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 锂基-复合钠基。📖 出处：《润滑基础知识培训》 → 第17章 稠化剂相容性（13×13稠化剂相容矩阵表）"
   },
   {
     "id": "1147",
@@ -1528,7 +1721,8 @@ const ALL_QUESTIONS = [
     "optionB": "170-200℃",
     "optionC": "200-260℃",
     "optionD": "230-250℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 200-260℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1148",
@@ -1537,7 +1731,8 @@ const ALL_QUESTIONS = [
     "optionB": "200-240℃",
     "optionC": "230-250℃",
     "optionD": ">300℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 200-240℃。📖 出处：《润滑基础知识培训》 → 第15章 常见润滑脂的滴点（滴点温度表）"
   },
   {
     "id": "1149",
@@ -1546,7 +1741,8 @@ const ALL_QUESTIONS = [
     "optionB": "●可能无法工作",
     "optionC": "↓请勿尝试",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. ↑安全。📖 出处：《润滑基础知识培训》 → 第11章 基础油与橡胶相容性（EPDM行）"
   },
   {
     "id": "1150",
@@ -1555,7 +1751,8 @@ const ALL_QUESTIONS = [
     "optionB": "POM",
     "optionC": "ABS",
     "optionD": "PC",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. PC。📖 出处：培训资料 → 综合知识"
   },
   {
     "id": "1151",
@@ -1564,7 +1761,8 @@ const ALL_QUESTIONS = [
     "optionB": "<110℃",
     "optionC": "<135℃",
     "optionD": "<175℃",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. <80℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1152",
@@ -1573,7 +1771,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "部分相容",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1153",
@@ -1582,7 +1781,8 @@ const ALL_QUESTIONS = [
     "optionB": "<200℃",
     "optionC": "<275℃",
     "optionD": "<300℃",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. <300℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1154",
@@ -1591,7 +1791,8 @@ const ALL_QUESTIONS = [
     "optionB": "钙基",
     "optionC": "无定形硅",
     "optionD": "复合钠基",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 无定形硅。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1155",
@@ -1600,7 +1801,8 @@ const ALL_QUESTIONS = [
     "optionB": "<250℃",
     "optionC": "<275℃",
     "optionD": "<300℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. <275℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1156",
@@ -1609,7 +1811,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1157",
@@ -1618,7 +1821,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1158",
@@ -1627,7 +1831,8 @@ const ALL_QUESTIONS = [
     "optionB": "钙基",
     "optionC": "锂基",
     "optionD": "复合钠基",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 锂基。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1159",
@@ -1636,7 +1841,8 @@ const ALL_QUESTIONS = [
     "optionB": "<125℃",
     "optionC": "<135℃",
     "optionD": "<175℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. <135℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1160",
@@ -1645,7 +1851,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1161",
@@ -1654,7 +1861,8 @@ const ALL_QUESTIONS = [
     "optionB": "<110℃",
     "optionC": "<125℃",
     "optionD": "<135℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. <110℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1162",
@@ -1663,7 +1871,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1163",
@@ -1672,7 +1881,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1164",
@@ -1681,7 +1891,8 @@ const ALL_QUESTIONS = [
     "optionB": "<125℃",
     "optionC": "<135℃",
     "optionD": "<175℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. <125℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1165",
@@ -1690,7 +1901,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1166",
@@ -1699,7 +1911,8 @@ const ALL_QUESTIONS = [
     "optionB": "PTFE",
     "optionC": "无定形硅",
     "optionD": "复合锂基",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 无定形硅。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1167",
@@ -1708,7 +1921,8 @@ const ALL_QUESTIONS = [
     "optionB": "<135℃",
     "optionC": "<175℃",
     "optionD": "<200℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. <175℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1168",
@@ -1717,7 +1931,8 @@ const ALL_QUESTIONS = [
     "optionB": "钙基和复合钙基",
     "optionC": "锂基和复合锂基",
     "optionD": "聚脲和膨润土",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 锂基和复合锂基。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1169",
@@ -1726,7 +1941,8 @@ const ALL_QUESTIONS = [
     "optionB": "<175℃",
     "optionC": "<200℃",
     "optionD": "<275℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. <175℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1170",
@@ -1735,7 +1951,8 @@ const ALL_QUESTIONS = [
     "optionB": "合成烃",
     "optionC": "PFPE",
     "optionD": "酯油",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. PFPE。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1171",
@@ -1744,7 +1961,8 @@ const ALL_QUESTIONS = [
     "optionB": "<175℃",
     "optionC": "<200℃",
     "optionD": "<275℃",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. <200℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1172",
@@ -1753,7 +1971,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1173",
@@ -1762,7 +1981,8 @@ const ALL_QUESTIONS = [
     "optionB": "不相容",
     "optionC": "全安全",
     "optionD": "不确定",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 不相容。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1174",
@@ -1771,7 +1991,8 @@ const ALL_QUESTIONS = [
     "optionB": "<200℃",
     "optionC": "<250℃",
     "optionD": "<275℃",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. <200℃。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（各稠化剂使用温度上限表）"
   },
   {
     "id": "1175",
@@ -1780,7 +2001,8 @@ const ALL_QUESTIONS = [
     "optionB": "复合钠基",
     "optionC": "锂基",
     "optionD": "聚脲",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 锂基。📖 出处：《润滑基础知识培训》 → 第18章 油和稠化剂（稠化剂与基础油相容性矩阵表）"
   },
   {
     "id": "1176",
@@ -1789,7 +2011,8 @@ const ALL_QUESTIONS = [
     "optionB": "防止金属表面生锈",
     "optionC": "摩擦面形成物理或化学密致分子膜抑制直接接触",
     "optionD": "改善粘附性能",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 摩擦面形成物理或化学密致分子膜抑制直接接触。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1177",
@@ -1798,7 +2021,8 @@ const ALL_QUESTIONS = [
     "optionB": "抑制氧化劣化",
     "optionC": "强力粘附金属表面",
     "optionD": "改善粘附性能",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 与金属表面反应形成边界润滑膜防止磨损和烧结。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1178",
@@ -1807,7 +2031,8 @@ const ALL_QUESTIONS = [
     "optionB": "强力粘附金属表面防止接触降低摩擦磨损",
     "optionC": "抑制氧化劣化",
     "optionD": "防止金属表面生锈",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 强力粘附金属表面防止接触降低摩擦磨损。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1179",
@@ -1816,7 +2041,8 @@ const ALL_QUESTIONS = [
     "optionB": "抑制促进氧化的金属新生面产生",
     "optionC": "抑制氧化劣化保持初始性能",
     "optionD": "改善粘附性能",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 抑制氧化劣化保持初始性能。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1180",
@@ -1825,7 +2051,8 @@ const ALL_QUESTIONS = [
     "optionB": "防止金属表面生锈",
     "optionC": "改善粘附性能",
     "optionD": "形成边界润滑膜",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 改善粘附性能。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1181",
@@ -1834,7 +2061,8 @@ const ALL_QUESTIONS = [
     "optionB": "防止金属表面生锈",
     "optionC": "抑制金属新生面产生",
     "optionD": "改善粘附性能",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 防止金属表面生锈。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1182",
@@ -1843,7 +2071,8 @@ const ALL_QUESTIONS = [
     "optionB": "抑制氧化劣化",
     "optionC": "改善粘附性能",
     "optionD": "抑制促进氧化的金属新生面和金属熔体产生",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 抑制促进氧化的金属新生面和金属熔体产生。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1183",
@@ -1852,7 +2081,8 @@ const ALL_QUESTIONS = [
     "optionB": "极压抗磨剂",
     "optionC": "抗氧剂",
     "optionD": "增粘剂",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 极压抗磨剂。📖 出处：《润滑基础知识培训》 → 第19章 添加剂种类和特性（7种添加剂功能表）"
   },
   {
     "id": "1184",
@@ -1861,7 +2091,8 @@ const ALL_QUESTIONS = [
     "optionB": "灰黑色，耐负荷性+耐磨耗性",
     "optionC": "黑色，低摩擦性",
     "optionD": "黄色/绿色，耐磨耗性",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 灰黑色，耐负荷性+耐磨耗性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1185",
@@ -1870,7 +2101,8 @@ const ALL_QUESTIONS = [
     "optionB": "白色，低摩擦性",
     "optionC": "黑色，低摩擦性",
     "optionD": "白色，高温下润滑性",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 黑色，低摩擦性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1186",
@@ -1879,7 +2111,8 @@ const ALL_QUESTIONS = [
     "optionB": "黑色，低摩擦性",
     "optionC": "白色，低摩擦性",
     "optionD": "白色，耐负荷性+耐磨耗性",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 白色，低摩擦性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1187",
@@ -1888,7 +2121,8 @@ const ALL_QUESTIONS = [
     "optionB": "白色，低摩擦性",
     "optionC": "白色，高温下润滑性",
     "optionD": "金属色，高温下烧结防止性",
-    "answer": "A"
+    "answer": "A",
+    "explanation": "正确答案：A. 白色，耐负荷性+耐磨耗性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1188",
@@ -1897,7 +2131,8 @@ const ALL_QUESTIONS = [
     "optionB": "白色，耐负荷性+耐磨耗性",
     "optionC": "白色，高温下润滑性",
     "optionD": "金属色，高温下烧结防止性",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 白色，高温下润滑性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1189",
@@ -1906,7 +2141,8 @@ const ALL_QUESTIONS = [
     "optionB": "金属色，高温下烧结防止性",
     "optionC": "黄色/绿色，耐磨耗性",
     "optionD": "灰黑色，耐负荷性+耐磨耗性",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 金属色，高温下烧结防止性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1190",
@@ -1915,7 +2151,8 @@ const ALL_QUESTIONS = [
     "optionB": "黑色，低摩擦性",
     "optionC": "白色，低摩擦性",
     "optionD": "黄色/绿色，耐磨耗性",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 黄色/绿色，耐磨耗性。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1191",
@@ -1924,7 +2161,8 @@ const ALL_QUESTIONS = [
     "optionB": "MCA",
     "optionC": "二硫化钼MoS₂",
     "optionD": "氮化硼",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 二硫化钼MoS₂。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1192",
@@ -1933,7 +2171,8 @@ const ALL_QUESTIONS = [
     "optionB": "MCA",
     "optionC": "聚四氟乙烯PTFE",
     "optionD": "氮化硼",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 氮化硼。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1193",
@@ -1942,7 +2181,8 @@ const ALL_QUESTIONS = [
     "optionB": "金属粉末（铜、镍）",
     "optionC": "有机钼",
     "optionD": "石墨",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 金属粉末（铜、镍）。📖 出处：《润滑基础知识培训》 → 第20章 常用固体添加剂的种类和特性（外观与效果表）"
   },
   {
     "id": "1194",
@@ -1951,7 +2191,8 @@ const ALL_QUESTIONS = [
     "optionB": "均质机",
     "optionC": "反应釜",
     "optionD": "泡脱槽",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 反应釜。📖 出处：《润滑基础知识培训》 → 第21章 润滑脂的生产工艺（5道工序流程）"
   },
   {
     "id": "1195",
@@ -1960,7 +2201,8 @@ const ALL_QUESTIONS = [
     "optionB": "真空脱除气泡",
     "optionC": "过滤杂质后灌装",
     "optionD": "生成稠化剂骨架",
-    "answer": "D"
+    "answer": "D",
+    "explanation": "正确答案：D. 生成稠化剂骨架。📖 出处：《润滑基础知识培训》 → 第21章 润滑脂的生产工艺（5道工序流程）"
   },
   {
     "id": "1196",
@@ -1969,7 +2211,8 @@ const ALL_QUESTIONS = [
     "optionB": "搅拌器",
     "optionC": "均质机",
     "optionD": "泡脱槽",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 搅拌器。📖 出处：《润滑基础知识培训》 → 第21章 润滑脂的生产工艺（5道工序流程）"
   },
   {
     "id": "1197",
@@ -1978,7 +2221,8 @@ const ALL_QUESTIONS = [
     "optionB": "搅拌器",
     "optionC": "均质机+研磨设备",
     "optionD": "泡脱槽(真空釜)",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 均质机+研磨设备。📖 出处：《润滑基础知识培训》 → 第21章 润滑脂的生产工艺（5道工序流程）"
   },
   {
     "id": "1198",
@@ -1987,7 +2231,8 @@ const ALL_QUESTIONS = [
     "optionB": "真空脱除气泡防气孔氧化",
     "optionC": "过滤杂质后灌装",
     "optionD": "生成稠化剂骨架",
-    "answer": "B"
+    "answer": "B",
+    "explanation": "正确答案：B. 真空脱除气泡防气孔氧化。📖 出处：《润滑基础知识培训》 → 第21章 润滑脂的生产工艺（5道工序流程）"
   },
   {
     "id": "1199",
@@ -1996,7 +2241,8 @@ const ALL_QUESTIONS = [
     "optionB": "泡脱",
     "optionC": "充填",
     "optionD": "混合",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 充填。📖 出处：《润滑基础知识培训》 → 第21章 润滑脂的生产工艺（5道工序流程）"
   },
   {
     "id": "1200",
@@ -2005,11 +2251,13 @@ const ALL_QUESTIONS = [
     "optionB": "膨润土",
     "optionC": "复合锂基",
     "optionD": "PTFE",
-    "answer": "C"
+    "answer": "C",
+    "explanation": "正确答案：C. 复合锂基。📖 出处：《润滑基础知识培训》 → 第14章 部分润滑脂稠化剂的结构（皂基纤维 vs 非皂基）"
   }
 ];
 
 // ======== STATE ========
+let currentUser = null;  // { name: "xxx", dept: "xxx" }
 let currentMode = "practice";
 let currentIndex = 0;
 let sessionQuestions = [];
@@ -2021,6 +2269,8 @@ let examRemain = 0;
 
 const CATEGORIES = ["检测指标", "基础油知识", "相容性", "稠化剂/添加剂/工艺"];
 const CAT_COLORS = ["#2980b9", "#27ae60", "#e67e22", "#8e44ad"];
+const USERS_KEY = "vnovo_quiz_users";  // stores list of known users
+const SESSION_KEY = "vnovo_quiz_session";  // stores current login session
 
 function getCategory(q) {
   const id = parseInt(q.id);
@@ -2031,14 +2281,30 @@ function getCategory(q) {
 }
 
 // ======== STORAGE ========
-const STORAGE_KEY = "vnovo_quiz_data_v2";
+// STORAGE_KEY is dynamic — each user has their own data space
+function getStorageKey() {
+  if (!currentUser) return null;
+  return "vnovo_quiz_" + currentUser.name + "_v2";
+}
 
-function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); }
+let _cacheData = null;
+
 function getData() {
+  const key = getStorageKey();
+  if (!key) return { history: [], wrong: [] };
+  if (_cacheData) return _cacheData;
   try {
-    const d = localStorage.getItem(STORAGE_KEY);
-    return d ? JSON.parse(d) : { history: [], wrong: [] };
-  } catch(e) { return { history: [], wrong: [] }; }
+    const d = localStorage.getItem(key);
+    _cacheData = d ? JSON.parse(d) : { history: [], wrong: [] };
+  } catch(e) { _cacheData = { history: [], wrong: [] }; }
+  return _cacheData;
+}
+
+function saveData(data) {
+  const key = getStorageKey();
+  if (!key) return;
+  if (data) _cacheData = data;
+  localStorage.setItem(key, JSON.stringify(_cacheData));
 }
 
 function addRecord(type, total, correct, time) {
@@ -2140,7 +2406,6 @@ function renderQuestion() {
   const ci = CATEGORIES.indexOf(cat);
   const progress = (currentIndex / sessionQuestions.length * 100).toFixed(1);
   const answered = sessionAnswers[q.id] !== undefined;
-  const area = currentMode === "practice" ? "practice-area" : currentMode === "random" ? "random-area" : "exam-area";
 
   let oh = "";
   ["A", "B", "C", "D"].forEach((lbl, i) => {
@@ -2156,25 +2421,25 @@ function renderQuestion() {
           '<span class="option-label">' + lbl + '</span><span>' + val + '</span></div>';
   });
 
-  let timerHtml = "";
-  if (currentMode === "exam") {
-    timerHtml = '<span style="color:#e74c3c;font-weight:600">⏱ ' + formatTime(examRemain) + '</span>';
-  }
-
   let expHtml = "";
   if (answered) {
     const ansKey = keyMap(q.answer);
-    expHtml = '<div class="explanation show">💡 正确答案: ' + q.answer + '. ' + q[ansKey] +
-              (q.explanation ? '<br>' + q.explanation : '') + '</div>';
+    const srcInfo = q.explanation ? q.explanation : "";
+    const sourcePart = srcInfo.includes("📖") ? '<br><span style="font-size:12px;color:#999">📖 ' + srcInfo.split("📖 ")[1] + '</span>' : '';
+    expHtml = '<div class="explanation show">💡 正确答案: ' + q.answer + '. ' + q[ansKey] + sourcePart + '</div>';
   }
 
-  document.getElementById(area).innerHTML =
+  let areaId;
+  if (currentMode === "practice") areaId = "practice-area";
+  else if (currentMode === "random") areaId = "random-area";
+  else areaId = "exam-area";
+
+  document.getElementById(areaId).innerHTML =
     '<div class="card">' +
     '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
     '<div class="question-header">' +
     '<span class="question-number">第 ' + (currentIndex + 1) + ' / ' + sessionQuestions.length + ' 题</span>' +
     '<span class="category-tag" style="background:' + CAT_COLORS[ci] + '20;color:' + CAT_COLORS[ci] + '">' + cat + '</span>' +
-    timerHtml +
     '</div>' +
     '<div class="question-text">' + q.question + '</div>' +
     '<div class="options">' + oh + '</div>' +
@@ -2184,15 +2449,6 @@ function renderQuestion() {
     '<button class="btn ' + (answered && currentIndex < sessionQuestions.length - 1 ? 'btn-primary' : 'btn-success') + '" id="next-btn"' + (!answered ? ' disabled' : '') + '>' +
     (currentIndex === sessionQuestions.length - 1 ? '✅ 提交' : '下一题 ➡') +
     '</button></div></div>';
-
-  // Bind option clicks
-  document.getElementById(area).querySelectorAll(".option:not(.disabled)").forEach(o => {
-    o.addEventListener("click", () => selectOpt(o.dataset.qid, o.dataset.lbl));
-  });
-
-  // Bind nav buttons
-  document.getElementById("prev-btn").addEventListener("click", prevQ);
-  document.getElementById("next-btn").addEventListener("click", nextQ);
 }
 
 // ======== ANSWER LOGIC ========
@@ -2208,7 +2464,7 @@ function selectOpt(qId, lbl) {
     addWrong(qId);
     showToast("❌ 回答错误，正确答案是 " + q.answer);
   }
-  renderQuestion();
+  renderQuestion(); // Re-render to show result + rebind events
 }
 
 function prevQ() { if (currentIndex > 0) { currentIndex--; renderQuestion(); } }
@@ -2238,14 +2494,32 @@ function startExam() {
   const perQ = parseInt(document.getElementById("exam-time").value);
   const s = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
   sessionQuestions = s.slice(0, Math.min(cnt, ALL_QUESTIONS.length));
-  currentIndex = 0; sessionAnswers = {}; sessionScore = { correct: 0, wrong: 0 }; sessionStartTime = Date.now();
+  currentIndex = 0;
+  sessionAnswers = {};
+  sessionScore = { correct: 0, wrong: 0 };
+  sessionStartTime = Date.now();
   examRemain = cnt * perQ;
+
+  // Show timer bar
+  const timerEl = document.getElementById("exam-timer");
+  timerEl.classList.remove("hidden");
+  timerEl.textContent = "⏱ " + formatTime(examRemain);
+
+  // Start independent timer (only updates timer display, does NOT re-render)
   if (examTimer) clearInterval(examTimer);
   examTimer = setInterval(() => {
     examRemain--;
-    if (examRemain <= 0) { clearInterval(examTimer); examTimer = null; showToast("⏰ 时间到！自动提交"); showResult(); return; }
-    if (currentIndex < sessionQuestions.length) renderQuestion();
+    if (examRemain <= 0) {
+      clearInterval(examTimer);
+      examTimer = null;
+      timerEl.classList.add("hidden");
+      showToast("⏰ 时间到！自动提交");
+      showResult();
+      return;
+    }
+    timerEl.textContent = "⏱ " + formatTime(examRemain);
   }, 1000);
+
   showToast("📋 考试开始！共 " + sessionQuestions.length + " 题");
   renderQuestion();
 }
@@ -2253,6 +2527,7 @@ function startExam() {
 // ======== RESULT ========
 function showResult() {
   if (examTimer) { clearInterval(examTimer); examTimer = null; }
+  document.getElementById("exam-timer").classList.add("hidden");
   const elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
   const total = sessionQuestions.length;
   const correct = sessionScore.correct;
@@ -2295,9 +2570,6 @@ function showResult() {
     '<div class="btn-row" style="justify-content:center;margin-top:25px">' +
     '<button class="btn btn-primary" id="back-home-btn">🏠 返回首页</button>' +
     '<button class="btn btn-success" id="retry-btn">🔄 再来一次</button></div></div>';
-
-  document.getElementById("back-home-btn").addEventListener("click", () => switchPage("home"));
-  document.getElementById("retry-btn").addEventListener("click", () => location.reload());
 }
 
 // ======== WRONG BOOK ========
@@ -2321,13 +2593,6 @@ function renderWrong() {
        '<button class="btn btn-outline" id="clear-wrong-btn" style="color:#e74c3c;border-color:#e74c3c">🗑️ 清空错题本</button>' +
        '<button class="btn btn-primary" id="retry-wrong-btn" style="margin-left:10px">🔄 重做错题</button></div></div>';
   area.innerHTML = h;
-
-  document.getElementById("clear-wrong-btn").addEventListener("click", clearWrong);
-  document.getElementById("retry-wrong-btn").addEventListener("click", retryWrong);
-
-  area.querySelectorAll(".wrong-item").forEach(item => {
-    item.addEventListener("click", () => reviewWrong(item.dataset.qid));
-  });
 }
 
 function clearWrong() {
@@ -2359,21 +2624,16 @@ function reviewWrong(qId) {
     oh += '<div class="option ' + cls + ' disabled"><span class="option-label">' + lbl + '</span><span>' + q[key] + '</span></div>';
   });
 
-  area.innerHTML =
-    '<div class="card">' +
+    const srcInfo2 = q.explanation ? q.explanation : "";
+    const sourcePart2 = srcInfo2.includes("📖") ? '<br><span style="font-size:12px;color:#999">📖 ' + srcInfo2.split("📖 ")[1] + '</span>' : '';
+    area.innerHTML =
+    '<div class="card" data-qid="' + qId + '">' +
     '<div class="question-header"><span class="question-number">错题回顾 · #' + qId + '</span><span class="category-tag">' + getCategory(q) + '</span></div>' +
     '<div class="question-text">' + q.question + '</div>' +
     '<div class="options">' + oh + '</div>' +
-    '<div class="explanation show">💡 正确答案: ' + q.answer + '. ' + q[keyMap(q.answer)] + (q.explanation ? '<br>' + q.explanation : '') + '</div>' +
+    '<div class="explanation show">💡 正确答案: ' + q.answer + '. ' + q[keyMap(q.answer)] + sourcePart2 + '</div>' +
     '<div class="btn-row"><button class="btn btn-outline" id="back-wrong-btn">⬅ 返回错题本</button>' +
     '<button class="btn btn-success" id="remove-wrong-btn" style="margin-left:auto">✅ 已掌握，移出错题</button></div></div>';
-
-  document.getElementById("back-wrong-btn").addEventListener("click", renderWrong);
-  document.getElementById("remove-wrong-btn").addEventListener("click", () => {
-    removeWrong(qId);
-    showToast("已从错题本移除");
-    renderWrong();
-  });
 }
 
 // ======== STATS ========
@@ -2426,35 +2686,206 @@ function renderStats() {
        '<button class="btn btn-outline" id="clear-all-btn" style="color:#e74c3c;border-color:#e74c3c">🗑️ 清除所有学习数据</button></div>';
 
   area.innerHTML = h;
-  document.getElementById("clear-all-btn").addEventListener("click", clearAll);
 }
 
 function clearAll() {
   if (confirm("确定清除所有学习记录和错题？此操作不可恢复！")) {
-    localStorage.removeItem(STORAGE_KEY);
+    const key = getStorageKey();
+    if (key) localStorage.removeItem(key);
+    _cacheData = null;
     renderStats();
     renderHome();
     showToast("所有数据已清除");
   }
 }
 
-// ======== KEYBOARD SHORTCUTS ========
-document.addEventListener("keydown", (e) => {
-  if (["practice", "random", "exam"].includes(currentMode) && currentIndex < sessionQuestions.length) {
-    const q = sessionQuestions[currentIndex];
-    if (sessionAnswers[q.id] === undefined) {
-      if (e.key === "1" || e.key === "a" || e.key === "A") selectOpt(q.id, "A");
-      if (e.key === "2" || e.key === "b" || e.key === "B") selectOpt(q.id, "B");
-      if (e.key === "3" || e.key === "c" || e.key === "C") selectOpt(q.id, "C");
-      if (e.key === "4" || e.key === "d" || e.key === "D") selectOpt(q.id, "D");
+// ======== LOGIN LOGIC ========
+function getKnownUsers() {
+  try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch(e) { return []; }
+}
+
+function saveKnownUser(name, dept) {
+  const users = getKnownUsers();
+  const idx = users.findIndex(u => u.name === name);
+  const entry = { name, dept: dept || "", lastLogin: new Date().toLocaleDateString() };
+  if (idx >= 0) users[idx] = entry;
+  else users.push(entry);
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function renderRecentUsers() {
+  const users = getKnownUsers();
+  const el = document.getElementById("login-recent");
+  if (!users.length) { el.innerHTML = ""; return; }
+  let h = '<div class="login-recent-title">最近登录：</div><div class="login-recent-list">';
+  users.slice(-6).reverse().forEach(u => {
+    h += '<button class="login-recent-item" data-name="' + u.name + '" data-dept="' + (u.dept || "") + '">' + u.name + (u.dept ? ' · ' + u.dept : '') + '</button>';
+  });
+  h += '</div>';
+  el.innerHTML = h;
+}
+
+function doLogin(name, dept) {
+  name = name.trim();
+  if (!name) {
+    document.getElementById("login-error").style.display = "block";
+    return;
+  }
+  document.getElementById("login-error").style.display = "none";
+
+  currentUser = { name, dept: dept || "" };
+  saveKnownUser(name, dept);
+  // Save session so auto-login on next visit
+  localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+
+  // Reset cache for new user
+  _cacheData = null;
+
+  // Show main app, hide login
+  document.getElementById("page-login").classList.add("hidden");
+  document.getElementById("main-app").classList.remove("hidden");
+  document.getElementById("header-user").classList.remove("hidden");
+  document.getElementById("display-username").textContent = "👤 " + name + (dept ? " · " + dept : "");
+
+  // Reset any ongoing session
+  currentMode = "practice";
+  currentIndex = 0;
+  sessionQuestions = [];
+  sessionAnswers = {};
+  sessionScore = { correct: 0, wrong: 0 };
+
+  switchPage("home");
+  showToast("欢迎 " + name + "！开始学习吧 📚");
+}
+
+function doLogout() {
+  currentUser = null;
+  _cacheData = null;
+  localStorage.removeItem(SESSION_KEY);
+
+  // Stop any exam timer
+  if (examTimer) { clearInterval(examTimer); examTimer = null; }
+  document.getElementById("exam-timer").classList.add("hidden");
+
+  // Show login, hide main app
+  document.getElementById("page-login").classList.remove("hidden");
+  document.getElementById("main-app").classList.add("hidden");
+  document.getElementById("header-user").classList.add("hidden");
+
+  // Reset form
+  document.getElementById("login-name").value = "";
+  document.getElementById("login-dept").value = "";
+  renderRecentUsers();
+  showToast("已退出登录");
+}
+
+function autoLogin() {
+  try {
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY));
+    if (session && session.name) {
+      doLogin(session.name, session.dept || "");
+      return true;
     }
-    if (e.key === "ArrowLeft") prevQ();
-    if (e.key === "ArrowRight" && sessionAnswers[q.id] !== undefined) nextQ();
+  } catch(e) {}
+  return false;
+}
+
+// ======== EVENT DELEGATION ========
+// Centralized click handling — works regardless of DOM re-renders
+document.addEventListener("click", function(e) {
+  // Login button
+  if (e.target.id === "login-btn" || e.target.closest("#login-btn")) {
+    doLogin(document.getElementById("login-name").value, document.getElementById("login-dept").value);
+    return;
+  }
+  // Logout button
+  if (e.target.id === "logout-btn" || e.target.closest("#logout-btn")) {
+    doLogout();
+    return;
+  }
+  // Recent user quick login
+  var rItem = e.target.closest(".login-recent-item");
+  if (rItem) {
+    doLogin(rItem.dataset.name, rItem.dataset.dept);
+    return;
+  }
+  // Option clicks (during quiz)
+  var opt = e.target.closest(".option:not(.disabled)");
+  if (opt && ["practice", "random", "exam"].includes(currentMode)) {
+    selectOpt(opt.dataset.qid, opt.dataset.lbl);
+    return;
+  }
+  // Prev / Next buttons (during quiz)
+  if (e.target.id === "prev-btn" || e.target.closest("#prev-btn")) {
+    if (currentIndex > 0) { currentIndex--; renderQuestion(); }
+    return;
+  }
+  if (e.target.id === "next-btn" || e.target.closest("#next-btn")) {
+    if (!sessionQuestions.length || sessionAnswers[sessionQuestions[currentIndex]?.id] === undefined) return;
+    if (currentIndex < sessionQuestions.length - 1) { currentIndex++; renderQuestion(); }
+    else showResult();
+    return;
+  }
+  // Result page buttons
+  if (e.target.id === "back-home-btn" || e.target.closest("#back-home-btn")) { switchPage("home"); return; }
+  if (e.target.id === "retry-btn" || e.target.closest("#retry-btn")) { location.reload(); return; }
+  // Wrong book buttons
+  if (e.target.id === "clear-wrong-btn" || e.target.closest("#clear-wrong-btn")) { clearWrong(); return; }
+  if (e.target.id === "retry-wrong-btn" || e.target.closest("#retry-wrong-btn")) { retryWrong(); return; }
+  if (e.target.id === "back-wrong-btn" || e.target.closest("#back-wrong-btn")) { renderWrong(); return; }
+  if (e.target.id === "remove-wrong-btn" || e.target.closest("#remove-wrong-btn")) {
+    var wItem = document.querySelector("#wrong-area .card");
+    var wQid = wItem ? wItem.dataset.qid : null;
+    if (wQid) { removeWrong(wQid); showToast("已从错题本移除"); renderWrong(); }
+    return;
+  }
+  // Wrong item click → review
+  var wItem2 = e.target.closest(".wrong-item[data-qid]");
+  if (wItem2 && document.getElementById("page-wrong").classList.contains("active")) {
+    reviewWrong(wItem2.dataset.qid);
+    return;
+  }
+  // Stats clear button
+  if (e.target.id === "clear-all-btn" || e.target.closest("#clear-all-btn")) { clearAll(); return; }
+});
+
+// ======== KEYBOARD SHORTCUTS ========
+// Enter key for login
+document.addEventListener("keydown", (e) => {
+  if (currentUser) return;  // Already logged in, skip login shortcuts
+  if (e.key === "Enter") {
+    if (document.getElementById("login-name") === document.activeElement || 
+        document.getElementById("login-dept") === document.activeElement) {
+      doLogin(document.getElementById("login-name").value, document.getElementById("login-dept").value);
+      return;
+    }
+  }
+});
+
+// Quiz shortcuts (only after login)
+document.addEventListener("keydown", (e) => {
+  if (!currentUser) return;  // No shortcuts on login page
+  if (!["practice", "random", "exam"].includes(currentMode) || currentIndex >= sessionQuestions.length) return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  const q = sessionQuestions[currentIndex];
+  if (sessionAnswers[q.id] === undefined) {
+    if (e.key === "1" || e.key === "a" || e.key === "A") selectOpt(q.id, "A");
+    if (e.key === "2" || e.key === "b" || e.key === "B") selectOpt(q.id, "B");
+    if (e.key === "3" || e.key === "c" || e.key === "C") selectOpt(q.id, "C");
+    if (e.key === "4" || e.key === "d" || e.key === "D") selectOpt(q.id, "D");
+  }
+  if (e.key === "ArrowLeft" && currentIndex > 0) { currentIndex--; renderQuestion(); }
+  if (e.key === "ArrowRight" && sessionAnswers[q.id] !== undefined) {
+    if (currentIndex < sessionQuestions.length - 1) { currentIndex++; renderQuestion(); }
+    else showResult();
   }
 });
 
 // ======== INIT ========
-renderHome();
+// Try auto-login first; if no session, show login page
+if (!autoLogin()) {
+  renderRecentUsers();
+}
 </script>
 </body>
 </html>
